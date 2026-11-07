@@ -102,7 +102,12 @@ class DebugRecorder:
 
         async def execute_command(command: Command) -> DeviceCommandResult:
             result = await original_execute(command)
-            if command.NAME not in ("getMapTrace", "getMinorMap", "getPos"):
+            if command.NAME not in (
+                "getMapTrace",
+                "getMinorMap",
+                "getPos",
+                "getBattery",
+            ):
                 self.commands.append(
                     {
                         "time": datetime.now(UTC).isoformat(timespec="seconds"),

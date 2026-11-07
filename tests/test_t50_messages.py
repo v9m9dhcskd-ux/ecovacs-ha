@@ -68,7 +68,12 @@ async def test_last_job_manually_stopped(
 async def test_sequential_queue_with_t50_messages(
     hass: HomeAssistant, rooms_entry: MockConfigEntry, mock_execute: AsyncMock
 ) -> None:
-    """The room queue continues when the T50 reports the end of a job."""
+    """The room queue follows the real T50 flow.
+
+    Recorded: the robot accepted the room right away, washed its mops in the
+    station for 22 minutes (reported as docked) and only then left. The queue
+    must not give up while the robot is still in the station.
+    """
     mock_execute.reset_mock()
     await hass.services.async_call(
         DOMAIN,
@@ -77,8 +82,36 @@ async def test_sequential_queue_with_t50_messages(
         blocking=True,
     )
     assert _area_values(mock_execute) == ["1,1"]
-    # Mop pre-wash is reported as docked, then the robot starts cleaning
+    manager = rooms_entry.runtime_data.room_manager(rooms_entry.runtime_data.devices[0])
+
+    # Robot accepts the job and washes its mops first (reported as docked)
+    await _message(hass, rooms_entry, "onCleanDataUpdate_V3", _clean_data(1, status=1))
     await _notify(hass, rooms_entry, StateEvent(State.DOCKED))
+    started = manager._queue_task is not None and not manager._queue_task.done()
+    assert started
+
+    # Leaves the station, cleans the room, room done, job ends
     await _notify(hass, rooms_entry, StateEvent(State.CLEANING))
+    await _message(hass, rooms_entry, "onCleanDataUpdate_V3", _clean_data(1))
+    await _message(hass, rooms_entry, "onCleanDataUpdate_V3", _clean_data(1, status=3))
+    await _message(hass, rooms_entry, "onLastTimeStats", LAST_TIME_STATS)
+    await _message(hass, rooms_entry, "onCleanDataUpdate_V3", _clean_data(None))
+    assert _area_values(mock_execute) == ["1,1", "1,2"]
+    assert hass.states.get("sensor.robbi_room_queue").state == "Flur"
+
+
+async def test_queue_accepts_room_from_job_report_without_cleaning_state(
+    hass: HomeAssistant, rooms_entry: MockConfigEntry, mock_execute: AsyncMock
+) -> None:
+    """The job report alone marks the room as started."""
+    mock_execute.reset_mock()
+    await hass.services.async_call(
+        DOMAIN,
+        "clean_rooms",
+        {"entity_id": VACUUM, "rooms": ["Küche", "Flur"]},
+        blocking=True,
+    )
+    await _message(hass, rooms_entry, "onCleanDataUpdate_V3", _clean_data(1, status=1))
+    # No CLEANING state at all, the job end still moves on to the next room
     await _message(hass, rooms_entry, "onLastTimeStats", LAST_TIME_STATS)
     assert _area_values(mock_execute) == ["1,1", "1,2"]

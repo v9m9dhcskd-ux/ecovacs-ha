@@ -4,7 +4,8 @@ Recorded from a real T50 MAX PRO OMNI (class c8rj4y, firmware 1.62.0):
 
 - ``onCleanDataUpdate_V3`` / ``onCleanDataUpdate_V2``: the rooms of the
   running job, e.g. ``{"content": [{"id": 0, "status": 2, "type": 1}]}``.
-  ``type`` 1 is a room, ``status`` 1 means planned, 2 means being cleaned.
+  ``type`` 1 is a room, ``status`` 1 means planned, 2 means being cleaned,
+  3 means done.
   An empty ``content`` means no room is open anymore.
 - ``onLastTimeStats``: sent once when a job ends, e.g.
   ``{"area": 0, "start": "1794056928", "time": 120, "type": "freeClean"}``.
@@ -93,4 +94,11 @@ class ExtraMessageHandler:
             ),
             None,
         )
-        self._manager.async_set_active_room(active)
+        job_rooms = {
+            int(entry["id"])
+            for entry in content
+            if isinstance(entry, dict)
+            and entry.get("type") == _ROOM_TYPE
+            and "id" in entry
+        }
+        self._manager.async_set_job(job_rooms, active)
