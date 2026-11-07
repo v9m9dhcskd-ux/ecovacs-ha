@@ -83,6 +83,10 @@ class RoomManager:
         self.current_room: int | None = None
         # Room the robot reports as being cleaned right now (newer robots)
         self.active_room: int | None = None
+        # Rooms of the job the robot reports (newer robots). The robot lists a
+        # room here as soon as it accepted the job, which can be long before
+        # it leaves the station (mop washing).
+        self.job_rooms: set[int] = set()
         # Set when the user stopped the robot through Home Assistant, so the
         # end of the job can be reported as "manually stopped"
         self.stop_requested: bool = False
@@ -202,10 +206,11 @@ class RoomManager:
         self._async_changed(save=True)
 
     @callback
-    def async_set_active_room(self, room_id: int | None) -> None:
-        """Set the room the robot is cleaning right now."""
-        if room_id != self.active_room:
-            self.active_room = room_id
+    def async_set_job(self, job_rooms: set[int], active_room: int | None) -> None:
+        """Set the rooms of the running job and the room being cleaned."""
+        if job_rooms != self.job_rooms or active_room != self.active_room:
+            self.job_rooms = job_rooms
+            self.active_room = active_room
             self._async_changed()
 
     @callback
@@ -350,6 +355,11 @@ class RoomManager:
             await self._device.execute_command(count.set(cleanings))
 
         room_ids = list(room_ids)
+        # Show the rooms of this cleaning as selection, no matter how it was
+        # started (room switches, vacuum.clean_area, clean_rooms action)
+        if self.map_id is not None and self._selections.get(self.map_id) != room_ids:
+            self._selections[self.map_id] = list(room_ids)
+            self._async_changed(save=True)
         if not sequential or len(room_ids) == 1:
             await self._send_area_clean(room_ids, cleanings)
             return
@@ -418,7 +428,7 @@ class RoomManager:
                 await self._clean_single_room(room_id, cleanings)
             _LOGGER.debug("Room queue finished")
         except RoomQueueAbortedError as err:
-            _LOGGER.info("Room queue stopped: %s", err)
+            _LOGGER.warning("Room queue stopped: %s", err)
         except asyncio.CancelledError:
             raise
         except Exception:
@@ -485,9 +495,16 @@ class RoomManager:
             elif event.status is CleanJobStatus.MANUALLY_STOPPED:
                 finish(False)
 
+        @callback
+        def on_job_changed() -> None:
+            # The robot accepted the job (it may still wash its mops first)
+            if room_id in self.job_rooms:
+                started.set()
+
         unsubscribers = [
             self._device.events.subscribe(state_cap.event, on_state),
             self._device.events.subscribe(ReportStatsEvent, on_report),
+            self.async_add_listener(on_job_changed),
         ]
         try:
             await self._send_area_clean([room_id], cleanings)
