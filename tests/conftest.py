@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from collections.abc import AsyncGenerator, Generator
 import json
 from pathlib import Path
@@ -11,8 +12,11 @@ from unittest.mock import AsyncMock, Mock, patch
 from deebot_client import const
 from deebot_client.command import DeviceCommandResult
 from deebot_client.device import Device
+from deebot_client.events import RoomsEvent
+from deebot_client.events.map import CachedMapInfoEvent, Map
 from deebot_client.exceptions import ApiError
-from deebot_client.models import AccountCredentials, Credentials
+from deebot_client.models import AccountCredentials, Credentials, Room
+from deebot_client.rs.map import RotationAngle
 from homeassistant.const import (
     CONF_COUNTRY,
     CONF_DEVICE_ID,
@@ -124,3 +128,24 @@ async def init_integration(
     yield mock_config_entry
     await hass.config_entries.async_unload(mock_config_entry.entry_id)
     await hass.async_block_till_done(wait_background_tasks=True)
+
+
+@pytest.fixture
+async def rooms_entry(
+    hass: HomeAssistant, init_integration: MockConfigEntry
+) -> MockConfigEntry:
+    """Integration with three rooms on the active map "EG"."""
+    device = init_integration.runtime_data.devices[0]
+    for event in (
+        CachedMapInfoEvent(
+            {Map(id="m1", name="EG", using=True, built=True, angle=RotationAngle.DEG_0)}
+        ),
+        RoomsEvent(
+            "m1",
+            [Room("Küche", 1, ""), Room("Flur", 2, ""), Room("Wohnzimmer", 3, "")],
+        ),
+    ):
+        device.events.notify(event)
+        await asyncio.gather(*device.events._tasks)
+        await hass.async_block_till_done()
+    return init_integration

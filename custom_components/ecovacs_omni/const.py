@@ -42,7 +42,9 @@ STATION_ACTIONS: tuple[StationAction, ...] = (
 
 # Room queue
 STORAGE_VERSION = 1
-SEQUENTIAL_START_TIMEOUT = 120  # seconds until the robot must report "cleaning"
+# seconds until the robot must report "cleaning" (the T50 first washes its
+# mops for ~2 minutes before it leaves the station)
+SEQUENTIAL_START_TIMEOUT = 600
 SEQUENTIAL_ROOM_TIMEOUT = 4 * 60 * 60  # max seconds for a single room
 
 SERVICE_CLEAN_ROOMS = "clean_rooms"

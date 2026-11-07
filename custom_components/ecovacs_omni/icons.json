@@ -213,6 +213,9 @@
       },
       "lifespan_air_freshener": {
         "default": "mdi:scent"
+      },
+      "current_room": {
+        "default": "mdi:map-marker-radius"
       }
     },
     "switch": {
