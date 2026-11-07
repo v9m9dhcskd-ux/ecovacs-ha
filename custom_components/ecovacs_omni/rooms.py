@@ -41,7 +41,9 @@ _LOGGER = logging.getLogger(__name__)
 
 # After the robot docked without sending a "job finished" report we wait this
 # long before we assume the room is done (the report normally arrives first).
-_DOCKED_GRACE_SECONDS = 90
+# Omni robots dock in the middle of a job to wash their mops (reported as
+# docked), so this must be longer than a wash cycle.
+_DOCKED_GRACE_SECONDS = 600
 
 
 @dataclass(frozen=True)
@@ -79,6 +81,11 @@ class RoomManager:
         self._queue_task: asyncio.Task[None] | None = None
         self.queue: list[int] = []
         self.current_room: int | None = None
+        # Room the robot reports as being cleaned right now (newer robots)
+        self.active_room: int | None = None
+        # Set when the user stopped the robot through Home Assistant, so the
+        # end of the job can be reported as "manually stopped"
+        self.stop_requested: bool = False
         self.queue_total: int = 0
 
         self._listeners: list[Callable[[], None]] = []
@@ -193,6 +200,13 @@ class RoomManager:
             )
         self._selections[self.map_id] = list(dict.fromkeys(room_ids))
         self._async_changed(save=True)
+
+    @callback
+    def async_set_active_room(self, room_id: int | None) -> None:
+        """Set the room the robot is cleaning right now."""
+        if room_id != self.active_room:
+            self.active_room = room_id
+            self._async_changed()
 
     @callback
     def async_set_sequential(self, sequential: bool) -> None:
@@ -324,6 +338,7 @@ class RoomManager:
                 translation_placeholders={"option": "rooms"},
             )
         await self.async_cancel_queue()
+        self.stop_requested = False
         if sequential is None:
             sequential = self.sequential
         if cleanings is None:

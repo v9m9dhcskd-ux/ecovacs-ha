@@ -152,6 +152,7 @@ class EcovacsOmniVacuum(EcovacsOmniEntity[Capabilities], StateVacuumEntity):
             await self._clean_command(CleanAction.RESUME)
             return
         await self._rooms.async_cancel_queue()
+        self._rooms.stop_requested = False
         await self._clean_command(CleanAction.START)
 
     async def async_pause(self) -> None:
@@ -161,11 +162,14 @@ class EcovacsOmniVacuum(EcovacsOmniEntity[Capabilities], StateVacuumEntity):
     async def async_stop(self, **kwargs: Any) -> None:
         """Stop cleaning and the room queue."""
         await self._rooms.async_cancel_queue()
+        self._rooms.stop_requested = True
         await self._clean_command(CleanAction.STOP)
 
     async def async_return_to_base(self, **kwargs: Any) -> None:
         """Return to the station and cancel the room queue."""
         await self._rooms.async_cancel_queue()
+        if self.activity in (VacuumActivity.CLEANING, VacuumActivity.PAUSED):
+            self._rooms.stop_requested = True
         await self._device.execute_command(self._capability.charge.execute())
 
     async def async_locate(self, **kwargs: Any) -> None:

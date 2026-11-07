@@ -32,6 +32,7 @@ from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers import aiohttp_client, device_registry as dr
 
 from .const import CONF_ACCOUNT_CREDENTIALS, DOMAIN
+from .extra_messages import ExtraMessageHandler
 from .recorder import DebugRecorder
 from .rooms import RoomManager
 
@@ -120,6 +121,8 @@ class EcovacsOmniController:
         for device in self._devices:
             manager = RoomManager(self._hass, device)
             await manager.async_load()
+            if recorder := self._recorders.get(device.device_info["did"]):
+                recorder.extra_handlers.append(ExtraMessageHandler(device, manager))
             self._room_managers[device.device_info["did"]] = manager
 
     async def _get_mqtt_client(self) -> MqttClient:

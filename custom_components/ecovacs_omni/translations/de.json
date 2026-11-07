@@ -273,6 +273,9 @@
       "room_queue": {
         "name": "Raum-Warteschlange"
       },
+      "current_room": {
+        "name": "Aktueller Raum"
+      },
       "lifespan_brush": {
         "name": "Hauptbürste"
       },

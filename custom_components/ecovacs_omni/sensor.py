@@ -184,6 +184,7 @@ async def async_setup_entry(
             manager = controller.room_manager(device)
             entities.append(SelectedRoomsSensor(device, manager))
             entities.append(RoomQueueSensor(device, manager))
+            entities.append(ActiveRoomSensor(device, manager))
     async_add_entities(entities)
 
 
@@ -330,3 +331,18 @@ class RoomQueueSensor(_RoomManagerSensor):
             "done": max(done, 0),
             "total": manager.queue_total,
         }
+
+
+class ActiveRoomSensor(_RoomManagerSensor):
+    """Room the robot reports as being cleaned right now."""
+
+    entity_description = SensorEntityDescription(
+        key="current_room", translation_key="current_room"
+    )
+
+    @property
+    def native_value(self) -> StateType:
+        """Return the room being cleaned."""
+        if self._manager.active_room is None:
+            return None
+        return self._manager.room_name(self._manager.active_room)

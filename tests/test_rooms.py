@@ -9,12 +9,9 @@ from unittest.mock import AsyncMock
 from deebot_client.events import (
     CleanJobStatus,
     ReportStatsEvent,
-    RoomsEvent,
     StateEvent,
 )
-from deebot_client.events.map import CachedMapInfoEvent, Map
-from deebot_client.models import Room, State
-from deebot_client.rs.map import RotationAngle
+from deebot_client.models import State
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
 import pytest
@@ -51,29 +48,6 @@ def _area_values(mock_execute: AsyncMock) -> list[str]:
         for args in _sent(mock_execute, "clean_V2")
         if args["content"].get("type") in ("freeClean", "spotArea")
     ]
-
-
-@pytest.fixture
-async def rooms_entry(
-    hass: HomeAssistant, init_integration: MockConfigEntry
-) -> MockConfigEntry:
-    """Integration with three rooms reported."""
-    await _notify(
-        hass,
-        init_integration,
-        CachedMapInfoEvent(
-            {Map(id="m1", name="EG", using=True, built=True, angle=RotationAngle.DEG_0)}
-        ),
-    )
-    await _notify(
-        hass,
-        init_integration,
-        RoomsEvent(
-            "m1",
-            [Room("Küche", 1, ""), Room("Flur", 2, ""), Room("Wohnzimmer", 3, "")],
-        ),
-    )
-    return init_integration
 
 
 async def test_room_switches_and_order(

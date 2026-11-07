@@ -273,6 +273,9 @@
       "room_queue": {
         "name": "Room queue"
       },
+      "current_room": {
+        "name": "Current room"
+      },
       "lifespan_brush": {
         "name": "Main brush"
       },

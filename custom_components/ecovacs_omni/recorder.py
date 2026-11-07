@@ -9,6 +9,7 @@ diagnostics download.
 from __future__ import annotations
 
 from collections import deque
+from collections.abc import Callable
 from datetime import UTC, datetime
 import json
 import logging
@@ -72,6 +73,8 @@ class DebugRecorder:
         # (e.g. the end of a cleaning job) are never pushed out by others
         self.latest_by_name: dict[str, deque[dict[str, Any]]] = {}
         self._device = device
+        # Called for every incoming message after deebot-client handled it
+        self.extra_handlers: list[Callable[[str, Any], None]] = []
 
         original_handle = device._handle_message
         original_execute = device._execute_command
@@ -91,6 +94,11 @@ class DebugRecorder:
             if message_name not in _SKIP_MESSAGES:
                 self.messages.append(entry)
             original_handle(message_name, message_data)
+            for handler in self.extra_handlers:
+                try:
+                    handler(message_name, message_data)
+                except Exception:
+                    _LOGGER.exception("Error handling message %s", message_name)
 
         async def execute_command(command: Command) -> DeviceCommandResult:
             result = await original_execute(command)
