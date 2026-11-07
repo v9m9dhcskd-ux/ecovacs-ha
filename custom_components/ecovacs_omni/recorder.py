@@ -73,7 +73,8 @@ class DebugRecorder:
         # (e.g. the end of a cleaning job) are never pushed out by others
         self.latest_by_name: dict[str, deque[dict[str, Any]]] = {}
         self._device = device
-        # Called for every incoming message after deebot-client handled it
+        # Called for every incoming message and command answer after
+        # deebot-client handled it
         self.extra_handlers: list[Callable[[str, Any], None]] = []
 
         original_handle = device._handle_message
@@ -94,14 +95,15 @@ class DebugRecorder:
             if message_name not in _SKIP_MESSAGES:
                 self.messages.append(entry)
             original_handle(message_name, message_data)
-            for handler in self.extra_handlers:
-                try:
-                    handler(message_name, message_data)
-                except Exception:
-                    _LOGGER.exception("Error handling message %s", message_name)
+            self._call_handlers(message_name, message_data)
 
         async def execute_command(command: Command) -> DeviceCommandResult:
             result = await original_execute(command)
+            # Answers are handled like messages (e.g. getWorkState like
+            # onWorkState), deebot-client already processed them
+            resp = result.raw_response.get("resp") if result.raw_response else None
+            if resp is not None:
+                self._call_handlers(command.NAME, resp)
             if command.NAME not in (
                 "getMapTrace",
                 "getMinorMap",
@@ -123,6 +125,13 @@ class DebugRecorder:
         # Device.initialize(), so this must run before initialize().
         device._handle_message = handle_message  # type: ignore[method-assign]
         device._execute_command = execute_command  # type: ignore[method-assign]
+
+    def _call_handlers(self, name: str, data: Any) -> None:
+        for handler in self.extra_handlers:
+            try:
+                handler(name, data)
+            except Exception:
+                _LOGGER.exception("Error handling %s", name)
 
     def as_dict(self) -> dict[str, Any]:
         """Return the recorded data."""

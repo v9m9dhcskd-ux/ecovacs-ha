@@ -18,7 +18,7 @@ from deebot_client.events import (
     RoomsEvent,
     StateEvent,
 )
-from deebot_client.models import CleanMode, State
+from deebot_client.models import CleanAction, CleanMode, State
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers.storage import Store
@@ -284,6 +284,28 @@ class RoomManager:
                     translation_key="not_supported",
                     translation_placeholders={"option": "water_amount"},
                 )
+
+    async def async_clean_action(self, action: CleanAction) -> None:
+        """Send start/pause/resume/stop and raise if the robot rejects it."""
+        response = await self._device.execute_command(
+            self._device.capabilities.clean.action.command(action)
+        )
+        if (code := response_code(response)) not in (None, 0):
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="command_rejected",
+                translation_placeholders={
+                    "command": action.value,
+                    "code": str(code),
+                    "response": str(response),
+                },
+            )
+
+    async def async_clean_all(self) -> None:
+        """Clean everything (cancels a room queue)."""
+        await self.async_cancel_queue()
+        self.stop_requested = False
+        await self.async_clean_action(CleanAction.START)
 
     def _default_cleanings(self) -> int:
         if event := self._device.events.get_last_event(CleanCountEvent):

@@ -12,7 +12,6 @@ from deebot_client.commands.json.station_action import (
 )
 from deebot_client.device import Device
 from deebot_client.events import LifeSpan
-from deebot_client.models import CleanAction
 from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
@@ -32,10 +31,7 @@ class RoomButtonDescription(ButtonEntityDescription):
 
 
 async def _clean_all(manager: RoomManager, device: Device) -> None:
-    await manager.async_cancel_queue()
-    await device.execute_command(
-        device.capabilities.clean.action.command(CleanAction.START)
-    )
+    await manager.async_clean_all()
 
 
 async def _cancel_queue(manager: RoomManager, device: Device) -> None:

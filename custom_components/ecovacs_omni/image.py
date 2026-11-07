@@ -15,6 +15,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .controller import EcovacsOmniConfigEntry
 from .entity import EcovacsOmniEntity
+from .map_trace import MapTraceUpdater
 
 
 async def async_setup_entry(
@@ -43,6 +44,7 @@ class EcovacsOmniMap(EcovacsOmniEntity[CapabilityMap], ImageEntity):
         super().__init__(device, capability, hass=hass)
         self._attr_extra_state_attributes = {}
         self._map = cast(Map, device.map)
+        self._trace_updater = MapTraceUpdater(hass, device, capability)
 
     def image(self) -> bytes | None:
         """Return the SVG map."""
@@ -65,6 +67,10 @@ class EcovacsOmniMap(EcovacsOmniEntity[CapabilityMap], ImageEntity):
 
         self._subscribe(self._capability.cached_info.event, on_info)
         self._subscribe(self._capability.changed.event, on_changed)
+
+        # Keep the driven line up to date while the robot is cleaning
+        self._trace_updater.async_start()
+        self.async_on_remove(self._trace_updater.async_stop)
 
     async def async_update(self) -> None:
         """Refresh the map (homeassistant.update_entity)."""
