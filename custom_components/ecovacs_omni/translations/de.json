@@ -68,7 +68,7 @@
       "message": "Der Roboter hat die Raumreinigung abgelehnt (Code {code}). Antwort: {response}"
     },
     "command_rejected": {
-      "message": "Der Roboter hat '{command}' abgelehnt (Code {code}). Antwort: {response}"
+      "message": "Der Roboter hat den Befehl {command} abgelehnt (Code {code}). Antwort: {response}"
     },
     "params_dict": {
       "message": "Parameter müssen ein Dictionary sein."
