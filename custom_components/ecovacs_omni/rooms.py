@@ -9,6 +9,7 @@ import logging
 from typing import Any
 
 from deebot_client.capabilities import CapabilityNumber, CapabilitySetTypes
+from deebot_client.commands.json.clean import CleanAreaV2
 from deebot_client.device import Device
 from deebot_client.events import (
     CleanCountEvent,
@@ -22,6 +23,13 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers.storage import Store
 
+from .commands import (
+    FREE_CLEAN,
+    SPOT_AREA,
+    UNKNOWN_TYPE_CODE,
+    CleanRoomsV2,
+    response_code,
+)
 from .const import (
     DOMAIN,
     SEQUENTIAL_ROOM_TIMEOUT,
@@ -63,6 +71,9 @@ class RoomManager:
         self.rooms: dict[int, RoomInfo] = {}
         self._selections: dict[str, list[int]] = {}
         self.sequential: bool = True
+        # "freeClean" (newer robots, e.g. T50) or "spotArea" (older robots).
+        # Detected automatically on the first room cleaning.
+        self.clean_type: str = FREE_CLEAN
 
         # Queue state
         self._queue_task: asyncio.Task[None] | None = None
@@ -84,6 +95,8 @@ class RoomManager:
                 for map_id, ids in data.get("selections", {}).items()
             }
             self.sequential = bool(data.get("sequential", True))
+            if data.get("clean_type") in (FREE_CLEAN, SPOT_AREA):
+                self.clean_type = data["clean_type"]
 
         if self._device.capabilities.map is not None:
             self._unsub_rooms = self._device.events.subscribe(
@@ -136,7 +149,11 @@ class RoomManager:
             listener()
 
     def _data_to_store(self) -> dict[str, Any]:
-        return {"selections": self._selections, "sequential": self.sequential}
+        return {
+            "selections": self._selections,
+            "sequential": self.sequential,
+            "clean_type": self.clean_type,
+        }
 
     # -------------------------------------------------------------- selection
 
@@ -311,6 +328,11 @@ class RoomManager:
             sequential = self.sequential
         if cleanings is None:
             cleanings = self._default_cleanings()
+        elif (count := self._device.capabilities.clean.count) is not None and (
+            cleanings != self._default_cleanings()
+        ):
+            # Like the app: set the number of passes before starting
+            await self._device.execute_command(count.set(cleanings))
 
         room_ids = list(room_ids)
         if not sequential or len(room_ids) == 1:
@@ -327,10 +349,45 @@ class RoomManager:
     async def _send_area_clean(self, room_ids: list[int], cleanings: int) -> None:
         area = self._device.capabilities.clean.action.area
         assert area is not None
-        _LOGGER.debug("Cleaning rooms %s (%s cleanings)", room_ids, cleanings)
-        await self._device.execute_command(
-            area(CleanMode.SPOT_AREA, list(room_ids), cleanings)
-        )
+        if not (isinstance(area, type) and issubclass(area, CleanAreaV2)):
+            # Older robots: use the command of deebot-client
+            _LOGGER.debug("Cleaning rooms %s (%s cleanings)", room_ids, cleanings)
+            await self._device.execute_command(
+                area(CleanMode.SPOT_AREA, list(room_ids), cleanings)
+            )
+            return
+
+        for attempt in range(2):
+            _LOGGER.debug(
+                "Cleaning rooms %s with type %s (%s cleanings)",
+                room_ids,
+                self.clean_type,
+                cleanings,
+            )
+            response = await self._device.execute_command(
+                CleanRoomsV2(room_ids, self.clean_type)
+            )
+            code = response_code(response)
+            if code == UNKNOWN_TYPE_CODE and attempt == 0:
+                other = SPOT_AREA if self.clean_type == FREE_CLEAN else FREE_CLEAN
+                _LOGGER.info(
+                    'Robot does not know room cleaning type "%s", using "%s"',
+                    self.clean_type,
+                    other,
+                )
+                self.clean_type = other
+                self._async_changed(save=True)
+                continue
+            if code not in (None, 0):
+                raise HomeAssistantError(
+                    translation_domain=DOMAIN,
+                    translation_key="clean_rejected",
+                    translation_placeholders={
+                        "code": str(code),
+                        "response": str(response),
+                    },
+                )
+            return
 
     async def _run_queue(self, cleanings: int) -> None:
         try:

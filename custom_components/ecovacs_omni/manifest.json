@@ -10,5 +10,5 @@
   "issue_tracker": "https://github.com/v9m9dhcskd-ux/ecovacs-ha/issues",
   "loggers": ["deebot_client"],
   "requirements": ["deebot-client==18.7.0"],
-  "version": "0.1.0"
+  "version": "0.1.1"
 }

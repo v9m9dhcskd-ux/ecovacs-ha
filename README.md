@@ -71,7 +71,7 @@ Die Auswahl bleibt über Neustarts erhalten. Ein fertiges Dashboard-Beispiel lie
 | Schalter | Verhalten |
 |---|---|
 | **An** (Standard) | Die Integration schickt einen Raum, wartet, bis der Roboter ihn als fertig meldet, und schickt dann den nächsten. **Die Reihenfolge ist garantiert.** Der Sensor *Raum-Warteschlange* zeigt den aktuellen Raum und die restlichen Räume. |
-| **Aus** | Alle Räume gehen in einem Befehl an den Roboter. Das ist schneller, aber der Roboter darf die Reihenfolge selbst optimieren. |
+| **Aus** | Alle Räume gehen in einem Befehl an den Roboter, wie bei der Ecovacs-App. Das ist schneller und ohne Zwischenstopps. Neuere Modelle wie der T50 halten nach Berichten aus der Community auch hier die Reihenfolge ein. Bitte selbst ausprobieren. |
 
 Verhalten der Warteschlange:
 
@@ -114,6 +114,13 @@ Der Roboter unterstützt auch die eingebaute Aktion `vacuum.clean_area` von Home
 2. Danach funktionieren z. B. Assist-Befehle wie „Reinige die Küche“.
 
 ## Hinweise und Einschränkungen
+
+- **Raumbefehl:** Neuere Modelle wie der T50 MAX PRO OMNI lehnen den Raumbefehl `spotArea` ab,
+  den `deebot-client` und die offizielle Integration verwenden (Fehler 20011 „unknown type“).
+  Diese Integration sendet deshalb wie die Ecovacs-App `freeClean` im Format `1,<Raum>;1,<Raum>`.
+  Die Durchgänge stellt sie vorher über `setCleanCount` ein. Kennt ein Roboter `freeClean` nicht,
+  wechselt sie automatisch auf `spotArea` und merkt sich das. Welche Variante aktiv ist, steht in
+  den Diagnosedaten unter `clean_type`.
 
 - **Nacheinander-Modus:** Nach jedem Raum meldet der Roboter „fertig“ und will zur Station zurück.
   Die Integration schickt sofort den nächsten Raum. Je nach Firmware fährt der T50 vorher kurz zur

@@ -49,7 +49,7 @@ def _area_values(mock_execute: AsyncMock) -> list[str]:
     return [
         args["content"]["value"]
         for args in _sent(mock_execute, "clean_V2")
-        if args["content"].get("type") == "spotArea"
+        if args["content"].get("type") in ("freeClean", "spotArea")
     ]
 
 
@@ -109,7 +109,7 @@ async def test_room_switches_and_order(
         {"entity_id": "button.robbi_clean_selected_rooms"},
         blocking=True,
     )
-    assert _area_values(mock_execute) == ["3,1"]
+    assert _area_values(mock_execute) == ["1,3;1,1"]
 
     await hass.services.async_call(
         "button",
@@ -133,7 +133,7 @@ async def test_sequential_queue(
     )
     await hass.async_block_till_done()
     assert _sent(mock_execute, "setSpeed") == [{"speed": 1}]
-    assert _area_values(mock_execute) == ["2"]
+    assert _area_values(mock_execute) == ["1,2"]
     queue = hass.states.get("sensor.robbi_room_queue")
     assert queue.state == "Flur"
     assert queue.attributes["remaining"] == ["Küche", "Wohnzimmer"]
@@ -143,15 +143,15 @@ async def test_sequential_queue(
     await _notify(
         hass,
         rooms_entry,
-        ReportStatsEvent(None, None, "spotArea", "c1", CleanJobStatus.CLEANING, []),
+        ReportStatsEvent(None, None, "freeClean", "c1", CleanJobStatus.CLEANING, []),
     )
     await _notify(
         hass,
         rooms_entry,
-        ReportStatsEvent(10, 300, "spotArea", "c1", CleanJobStatus.FINISHED, []),
+        ReportStatsEvent(10, 300, "freeClean", "c1", CleanJobStatus.FINISHED, []),
     )
     await _notify(hass, rooms_entry, StateEvent(State.RETURNING))
-    assert _area_values(mock_execute) == ["2", "1"]
+    assert _area_values(mock_execute) == ["1,2", "1,1"]
     assert hass.states.get("sensor.robbi_room_queue").state == "Küche"
 
     # Room 2: started and finished
@@ -159,9 +159,9 @@ async def test_sequential_queue(
     await _notify(
         hass,
         rooms_entry,
-        ReportStatsEvent(8, 200, "spotArea", "c2", CleanJobStatus.FINISHED, []),
+        ReportStatsEvent(8, 200, "freeClean", "c2", CleanJobStatus.FINISHED, []),
     )
-    assert _area_values(mock_execute) == ["2", "1", "3"]
+    assert _area_values(mock_execute) == ["1,2", "1,1", "1,3"]
 
     # Room 3 is stopped manually -> queue ends
     await _notify(hass, rooms_entry, StateEvent(State.RETURNING))
@@ -169,13 +169,13 @@ async def test_sequential_queue(
     await _notify(
         hass,
         rooms_entry,
-        ReportStatsEvent(3, 50, "spotArea", "c3", CleanJobStatus.MANUALLY_STOPPED, []),
+        ReportStatsEvent(3, 50, "freeClean", "c3", CleanJobStatus.MANUALLY_STOPPED, []),
     )
     await hass.async_block_till_done()
     queue = hass.states.get("sensor.robbi_room_queue")
     assert queue.state == "unknown"
     assert queue.attributes["running"] is False
-    assert _area_values(mock_execute) == ["2", "1", "3"]
+    assert _area_values(mock_execute) == ["1,2", "1,1", "1,3"]
 
 
 async def test_stop_cancels_queue(
@@ -195,7 +195,7 @@ async def test_stop_cancels_queue(
     )
     await hass.async_block_till_done()
     assert hass.states.get(VACUUM).attributes["room_queue"]["running"] is False
-    assert _area_values(mock_execute) == ["2"]
+    assert _area_values(mock_execute) == ["1,2"]
 
 
 async def test_unknown_room(hass: HomeAssistant, rooms_entry: MockConfigEntry) -> None:
@@ -265,3 +265,85 @@ async def test_clean_area_segments(
         ("m1_2", "Flur", "EG"),
         ("m1_3", "Wohnzimmer", "EG"),
     ]
+
+
+async def test_free_clean_payload_and_passes(
+    hass: HomeAssistant, rooms_entry: MockConfigEntry, mock_execute: AsyncMock
+) -> None:
+    """The T50 gets the app payload; passes are set with setCleanCount first."""
+    mock_execute.reset_mock()
+    await hass.services.async_call(
+        DOMAIN,
+        "clean_rooms",
+        {
+            "entity_id": VACUUM,
+            "rooms": ["Wohnzimmer", "Küche"],
+            "sequential": False,
+            "cleanings": 2,
+        },
+        blocking=True,
+    )
+    names = [call.args[0].NAME for call in mock_execute.call_args_list]
+    assert names.index("setCleanCount") < names.index("clean_V2")
+    assert _sent(mock_execute, "setCleanCount") == [{"count": 2}]
+    assert _sent(mock_execute, "clean_V2") == [
+        {"act": "start", "content": {"type": "freeClean", "value": "1,3;1,1"}}
+    ]
+
+
+async def test_fallback_to_spot_area(
+    hass: HomeAssistant, rooms_entry: MockConfigEntry, mock_execute: AsyncMock
+) -> None:
+    """Robots answering 20011 "unknown type" get spotArea instead."""
+    from deebot_client.command import DeviceCommandResult
+
+    def respond(command):
+        code = 0
+        if (
+            command.NAME == "clean_V2"
+            and command._args["content"]["type"] == "freeClean"
+        ):
+            code = 20011
+        return DeviceCommandResult(
+            device_reached=True,
+            raw_response={"ret": "ok", "resp": {"body": {"code": code, "msg": "x"}}},
+        )
+
+    mock_execute.reset_mock()
+    mock_execute.side_effect = respond
+    await hass.services.async_call(
+        DOMAIN,
+        "clean_rooms",
+        {"entity_id": VACUUM, "rooms": ["Flur", "Küche"], "sequential": False},
+        blocking=True,
+    )
+    assert _area_values(mock_execute) == ["1,2;1,1", "2,1"]
+    assert rooms_entry.runtime_data.room_manager(_device(rooms_entry)).clean_type == (
+        "spotArea"
+    )
+    # The detected type is remembered
+    mock_execute.reset_mock()
+    await hass.services.async_call(
+        DOMAIN, "clean_rooms", {"entity_id": VACUUM, "rooms": ["Flur"]}, blocking=True
+    )
+    assert _area_values(mock_execute) == ["2"]
+
+
+async def test_rejected_room_clean_raises(
+    hass: HomeAssistant, rooms_entry: MockConfigEntry, mock_execute: AsyncMock
+) -> None:
+    """Other error codes are shown to the user."""
+    from deebot_client.command import DeviceCommandResult
+    from homeassistant.exceptions import HomeAssistantError
+
+    mock_execute.return_value = DeviceCommandResult(
+        device_reached=True,
+        raw_response={"ret": "ok", "resp": {"body": {"code": 500, "msg": "busy"}}},
+    )
+    with pytest.raises(HomeAssistantError):
+        await hass.services.async_call(
+            DOMAIN,
+            "clean_rooms",
+            {"entity_id": VACUUM, "rooms": ["Flur"]},
+            blocking=True,
+        )

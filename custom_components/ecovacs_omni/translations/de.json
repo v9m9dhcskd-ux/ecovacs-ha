@@ -64,6 +64,9 @@
     "water_amount_range": {
       "message": "Die Wassermenge muss zwischen {min} und {max} liegen."
     },
+    "clean_rejected": {
+      "message": "Der Roboter hat die Raumreinigung abgelehnt (Code {code}). Antwort: {response}"
+    },
     "params_dict": {
       "message": "Parameter müssen ein Dictionary sein."
     }
