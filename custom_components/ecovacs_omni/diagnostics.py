@@ -8,7 +8,6 @@ import logging
 from typing import Any
 
 from deebot_client.commands.json.charge_state import GetChargeState
-from deebot_client.commands.json.clean import GetCleanInfoV2
 from deebot_client.commands.json.stats import GetStats
 from deebot_client.commands.json.work_state import GetWorkState
 from deebot_client.device import Device
@@ -102,7 +101,10 @@ def _is_instance(value: Any) -> bool:
 async def _probe(device: Device) -> dict[str, Any]:
     """Ask the robot for its current state and return the raw answers."""
     result: dict[str, Any] = {}
-    for command in (GetWorkState(), GetCleanInfoV2(), GetChargeState(), GetStats()):
+    # Only commands whose answers deebot-client interprets correctly for the
+    # T50: getCleanInfo_V2 always answers "idle" there and would set the
+    # vacuum to idle in the middle of a cleaning.
+    for command in (GetWorkState(), GetChargeState(), GetStats()):
         try:
             async with asyncio.timeout(15):
                 result[command.NAME] = await device.execute_command(command)
