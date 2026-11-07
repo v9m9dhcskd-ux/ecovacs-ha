@@ -22,21 +22,42 @@ _LOGGER = logging.getLogger(__name__)
 _MAX_ENTRIES = 150
 _MAX_LENGTH = 4000
 
-# High frequency messages, not interesting for diagnostics
-_SKIP_MESSAGES = frozenset({"onPos", "onMapTrace", "onMinorMap", "onMapTrace_V2"})
+_LATEST_PER_NAME = 3
+
+# High frequency messages, kept out of the timeline (only the latest of each
+# type is kept, see latest_by_name)
+_SKIP_MESSAGES = frozenset(
+    {
+        "onPos",
+        "onPosLf",
+        "onMapTrace",
+        "onMapTrace_V2",
+        "onMinorMap",
+        "onWorkProgressReport",
+        "onFwBuryPoint-bd_cri04",
+        "onFwBuryPoint-bd_basicinfo",
+        "onFwBuryPoint-common-setting",
+        "onFwBuryPoint-formulate-setting",
+    }
+)
 
 
 def _shorten(value: Any) -> Any:
+    """Return JSON-friendly data, decoded from bytes and limited in size."""
+    if isinstance(value, bytes | bytearray):
+        value = value.decode("utf-8", errors="replace")
+    if isinstance(value, str):
+        try:
+            value = json.loads(value)
+        except ValueError:
+            return value[:_MAX_LENGTH]
     try:
-        text = value if isinstance(value, str) else json.dumps(value, default=str)
+        text = json.dumps(value, default=str)
     except TypeError, ValueError:
-        text = str(value)
+        return str(value)[:_MAX_LENGTH]
     if len(text) > _MAX_LENGTH:
         return text[:_MAX_LENGTH] + "...(truncated)"
-    try:
-        return json.loads(text) if not isinstance(value, str) else text
-    except ValueError:
-        return text
+    return value
 
 
 class DebugRecorder:
@@ -47,6 +68,9 @@ class DebugRecorder:
         self.messages: deque[dict[str, Any]] = deque(maxlen=_MAX_ENTRIES)
         self.commands: deque[dict[str, Any]] = deque(maxlen=_MAX_ENTRIES)
         self.message_names: dict[str, int] = {}
+        # The last few payloads of every message type, so rare messages
+        # (e.g. the end of a cleaning job) are never pushed out by others
+        self.latest_by_name: dict[str, deque[dict[str, Any]]] = {}
         self._device = device
 
         original_handle = device._handle_message
@@ -56,14 +80,16 @@ class DebugRecorder:
             self.message_names[message_name] = (
                 self.message_names.get(message_name, 0) + 1
             )
+            entry = {
+                "time": datetime.now(UTC).isoformat(timespec="seconds"),
+                "name": message_name,
+                "data": _shorten(message_data),
+            }
+            self.latest_by_name.setdefault(
+                message_name, deque(maxlen=_LATEST_PER_NAME)
+            ).append(entry)
             if message_name not in _SKIP_MESSAGES:
-                self.messages.append(
-                    {
-                        "time": datetime.now(UTC).isoformat(timespec="seconds"),
-                        "name": message_name,
-                        "data": _shorten(message_data),
-                    }
-                )
+                self.messages.append(entry)
             original_handle(message_name, message_data)
 
         async def execute_command(command: Command) -> DeviceCommandResult:
@@ -90,5 +116,9 @@ class DebugRecorder:
         return {
             "message_counts": dict(sorted(self.message_names.items())),
             "messages": list(self.messages),
+            "latest_by_name": {
+                name: list(entries)
+                for name, entries in sorted(self.latest_by_name.items())
+            },
             "commands": list(self.commands),
         }
