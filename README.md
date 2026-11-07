@@ -7,8 +7,8 @@ die die Bibliothek [`deebot-client`](https://github.com/DeebotUniverse/client.py
 Der Schwerpunkt liegt auf dem, was der offiziellen Ecovacs-Integration fehlt:
 
 - **Einzelne oder mehrere Räume reinigen, in einer festen Reihenfolge**
-  - Raumauswahl per Schalter im Dashboard
-  - Reinigung per Aktion `ecovacs_omni.clean_rooms`
+  - über „Reinigung nach Bereich“ im Staubsauger-Dialog bzw. Sprachsteuerung (`vacuum.clean_area`)
+  - per Aktion `ecovacs_omni.clean_rooms` in Skripten und Automationen
 - **Ganze Wohnung reinigen** mit einem Knopf
 - **Station steuern:** Staub absaugen, Mopps waschen, Mopps trocknen, Station reinigen
 - **Alle wichtigen Status**
@@ -42,11 +42,11 @@ Sprache von Home Assistant.
 | Typ | Entitäten |
 |---|---|
 | Staubsauger | `vacuum.robbi`: Start/Fortsetzen, Pause, Stopp, zur Station, Saugstärke, Orten (Ton) |
-| Buttons | Ganze Wohnung reinigen, Ausgewählte Räume reinigen, Raumauswahl leeren, Raum-Warteschlange abbrechen, Staub absaugen, Mopps waschen, Mopps trocknen, Station reinigen, Neu orten, Verbrauchsteile zurücksetzen (standardmäßig deaktiviert) |
-| Schalter | **Raum ‹Name›** (ein Schalter pro Raum), **Räume nacheinander reinigen**, Automatisch absaugen, Teppich-Boost, Nach dem Laden fortsetzen, Kindersicherung, TrueDetect, … |
+| Buttons | Ganze Wohnung reinigen, Raum-Warteschlange abbrechen, Staub absaugen, Mopps waschen, Mopps trocknen, Station reinigen, Neu orten, Verbrauchsteile zurücksetzen (standardmäßig deaktiviert) |
+| Schalter | **Räume nacheinander reinigen**, Automatisch absaugen, Teppich-Boost, Nach dem Laden fortsetzen, Kindersicherung, TrueDetect, … |
 | Auswahl | Reinigungsmodus (Saugen/Wischen/beides/erst Saugen dann Wischen), Absaug-Häufigkeit, Effizienzmodus, Aktive Karte |
 | Zahlen | Wassermenge (0–50), Durchgänge, Lautstärke |
-| Sensoren | Batterie, Gereinigte Fläche, Reinigungsdauer, Letzter Auftrag, Station, Fehler, **Ausgewählte Räume**, **Raum-Warteschlange**, Verbrauchsteile in %, Gesamtstatistik, WLAN (standardmäßig deaktiviert) |
+| Sensoren | Batterie, Gereinigte Fläche, Reinigungsdauer, Letzter Auftrag, Station, Fehler, **Aktueller Raum**, **Räume des Auftrags**, **Raum-Warteschlange**, Verbrauchsteile in %, Gesamtstatistik, WLAN (standardmäßig deaktiviert) |
 | Binärsensoren | Mopp montiert, In der Station |
 | Bild | Karte |
 
@@ -56,17 +56,20 @@ Die Räume werden automatisch aus der im Roboter gespeicherten Karte gelesen. Be
 Namen, die du in der Ecovacs-App vergeben hast. Benennst du dort Räume um oder teilst sie neu auf,
 erscheinen die Änderungen von selbst.
 
-### Im Dashboard
+### Im Dashboard: „Reinigung nach Bereich“
 
-1. Die gewünschten Räume über die Schalter **Raum ‹Name›** einschalten. **Die Reihenfolge des
-   Einschaltens ist die Reinigungsreihenfolge.** Der Sensor *Ausgewählte Räume* zeigt sie an,
-   z. B. `Küche → Flur → Wohnzimmer`.
-2. Den Button **Ausgewählte Räume reinigen** drücken.
+Einmalig in den Einstellungen der Staubsauger-Entität die Ecovacs-Räume den HA-Bereichen
+zuordnen. Danach im Staubsauger-Dialog **Reinigung → Nach Bereich** die Räume wählen und starten.
+Das geht auch per Sprache (Assist: „Reinige die Küche“) und mit der Aktion `vacuum.clean_area`.
 
-Die Auswahl bleibt über Neustarts erhalten. Startest du eine Reinigung auf anderem Weg
-(„Reinigung nach Bereich“ im Staubsauger-Dialog, `vacuum.clean_area` oder
-`ecovacs_omni.clean_rooms`), übernehmen *Ausgewählte Räume* und die Raum-Schalter deren Räume. Ein fertiges Dashboard-Beispiel liegt in
-[`examples/dashboard.yaml`](examples/dashboard.yaml).
+Während der Reinigung zeigen:
+
+- **Räume des Auftrags:** die Räume der laufenden bzw. letzten Reinigung in Reihenfolge,
+  z. B. `Küche → Flur`
+- **Aktueller Raum:** der Raum, den der Roboter gerade reinigt (bzw. gleich anfährt)
+- **Raum-Warteschlange:** im Nacheinander-Modus den aktuellen und die restlichen Räume
+
+Ein Dashboard-Beispiel liegt in [`examples/dashboard.yaml`](examples/dashboard.yaml).
 
 ### Reihenfolge: „Räume nacheinander reinigen“
 
@@ -100,20 +103,11 @@ Weitere Aktionen:
 
 | Aktion | Zweck |
 |---|---|
-| `ecovacs_omni.clean_selected_rooms` | Reinigt die per Schalter ausgewählten Räume (gleiche optionale Felder) |
-| `ecovacs_omni.select_rooms` | Setzt die Raumauswahl samt Reihenfolge, z. B. `rooms: ["Bad", "Flur"]` |
 | `ecovacs_omni.cancel_room_queue` | Bricht die Warteschlange ab; der aktuelle Raum wird noch fertig |
 | `ecovacs_omni.station_action` | `action: empty_dustbin \| wash_mop \| dry_mop \| clean_base` |
 | `ecovacs_omni.get_rooms` | Liefert alle Räume mit IDs (in *Entwicklerwerkzeuge → Aktionen* ausprobieren) |
 
 Statt Namen gehen auch Raum-IDs (`rooms: [3, 1]`). Groß- und Kleinschreibung spielt keine Rolle.
-
-### Sprachsteuerung und HA-Bereiche
-
-Der Roboter unterstützt auch die eingebaute Aktion `vacuum.clean_area` von Home Assistant:
-
-1. In den Einstellungen der Staubsauger-Entität die Ecovacs-Räume den HA-Bereichen zuordnen.
-2. Danach funktionieren z. B. Assist-Befehle wie „Reinige die Küche“.
 
 ## Hinweise und Einschränkungen
 

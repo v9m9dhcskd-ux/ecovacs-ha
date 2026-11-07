@@ -50,26 +50,10 @@ def _area_values(mock_execute: AsyncMock) -> list[str]:
     ]
 
 
-async def test_room_switches_and_order(
+async def test_direct_mode_and_job_rooms(
     hass: HomeAssistant, rooms_entry: MockConfigEntry, mock_execute: AsyncMock
 ) -> None:
-    """Room switches are created and the selection order is kept."""
-    assert hass.states.get("switch.robbi_room_kuche") is not None
-    assert hass.states.get("switch.robbi_room_wohnzimmer") is not None
-
-    for room in ("wohnzimmer", "kuche"):
-        await hass.services.async_call(
-            "switch",
-            "turn_on",
-            {"entity_id": f"switch.robbi_room_{room}"},
-            blocking=True,
-        )
-    state = hass.states.get("sensor.robbi_selected_rooms")
-    assert state.state == "Wohnzimmer → Küche"
-    assert state.attributes["room_ids"] == [3, 1]
-    assert hass.states.get("switch.robbi_room_kuche").attributes["order"] == 2
-
-    # Direct mode: one command with all rooms in the selected order
+    """Direct mode sends all rooms in one command; the job rooms are shown."""
     await hass.services.async_call(
         "switch",
         "turn_off",
@@ -78,20 +62,16 @@ async def test_room_switches_and_order(
     )
     mock_execute.reset_mock()
     await hass.services.async_call(
-        "button",
-        "press",
-        {"entity_id": "button.robbi_clean_selected_rooms"},
+        DOMAIN,
+        "clean_rooms",
+        {"entity_id": VACUUM, "rooms": ["Wohnzimmer", "Küche"]},
         blocking=True,
     )
     assert _area_values(mock_execute) == ["1,3;1,1"]
-
-    await hass.services.async_call(
-        "button",
-        "press",
-        {"entity_id": "button.robbi_clear_room_selection"},
-        blocking=True,
-    )
-    assert hass.states.get("sensor.robbi_selected_rooms").state == "unknown"
+    state = hass.states.get("sensor.robbi_rooms_of_the_job")
+    assert state.state == "Wohnzimmer → Küche"
+    assert state.attributes["room_ids"] == [3, 1]
+    assert hass.states.get(VACUUM).attributes["job_rooms"] == ["Wohnzimmer", "Küche"]
 
 
 async def test_sequential_queue(
@@ -183,14 +163,12 @@ async def test_unknown_room(hass: HomeAssistant, rooms_entry: MockConfigEntry) -
         )
 
 
-async def test_get_rooms_and_select(
-    hass: HomeAssistant, rooms_entry: MockConfigEntry
-) -> None:
-    """get_rooms returns the rooms, select_rooms sets the order."""
+async def test_get_rooms(hass: HomeAssistant, rooms_entry: MockConfigEntry) -> None:
+    """get_rooms returns the rooms and the rooms of the last job."""
     await hass.services.async_call(
         DOMAIN,
-        "select_rooms",
-        {"entity_id": VACUUM, "rooms": ["Flur", "Küche"]},
+        "clean_rooms",
+        {"entity_id": VACUUM, "rooms": ["Flur", "Küche"], "sequential": False},
         blocking=True,
     )
     result = await hass.services.async_call(
@@ -198,7 +176,7 @@ async def test_get_rooms_and_select(
     )
     data = result[VACUUM]
     assert [r["name"] for r in data["rooms"]] == ["Küche", "Flur", "Wohnzimmer"]
-    assert data["selection"] == ["Flur", "Küche"]
+    assert data["job_rooms"] == ["Flur", "Küche"]
 
 
 async def test_station_action_and_clean_all(

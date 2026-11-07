@@ -56,7 +56,7 @@
       "message": "Unbekannter Raum \"{room}\". Vorhandene Räume: {rooms}"
     },
     "no_rooms_selected": {
-      "message": "Keine Räume ausgewählt."
+      "message": "Keine Räume angegeben."
     },
     "not_supported": {
       "message": "\"{option}\" wird von diesem Roboter nicht unterstützt."
@@ -86,12 +86,6 @@
     "button": {
       "clean_all": {
         "name": "Ganze Wohnung reinigen"
-      },
-      "clean_selected_rooms": {
-        "name": "Ausgewählte Räume reinigen"
-      },
-      "clear_room_selection": {
-        "name": "Raumauswahl leeren"
       },
       "cancel_room_queue": {
         "name": "Raum-Warteschlange abbrechen"
@@ -267,8 +261,8 @@
           }
         }
       },
-      "selected_rooms": {
-        "name": "Ausgewählte Räume"
+      "job_rooms": {
+        "name": "Räume des Auftrags"
       },
       "room_queue": {
         "name": "Raum-Warteschlange"
@@ -358,9 +352,6 @@
       },
       "sequential_rooms": {
         "name": "Räume nacheinander reinigen"
-      },
-      "room": {
-        "name": "Raum {room}"
       }
     },
     "vacuum": {
@@ -432,42 +423,6 @@
         "water_amount": {
           "name": "Wassermenge",
           "description": "Wassermenge beim Wischen (T50: Zahl 0-50)."
-        }
-      }
-    },
-    "clean_selected_rooms": {
-      "name": "Ausgewählte Räume reinigen",
-      "description": "Reinigt die über die Raum-Schalter ausgewählten Räume in der Reihenfolge der Auswahl.",
-      "fields": {
-        "sequential": {
-          "name": "Nacheinander",
-          "description": "Jeden Raum einzeln reinigen, damit die Reihenfolge garantiert ist. Standard: der Schalter 'Räume nacheinander reinigen'."
-        },
-        "cleanings": {
-          "name": "Durchgänge",
-          "description": "Wie oft jeder Raum gereinigt wird."
-        },
-        "work_mode": {
-          "name": "Reinigungsmodus",
-          "description": "Saugen, Wischen oder beides."
-        },
-        "fan_speed": {
-          "name": "Saugstärke",
-          "description": "Saugstärke für diese Reinigung."
-        },
-        "water_amount": {
-          "name": "Wassermenge",
-          "description": "Wassermenge beim Wischen (T50: Zahl 0-50)."
-        }
-      }
-    },
-    "select_rooms": {
-      "name": "Räume auswählen",
-      "description": "Ersetzt die Raumauswahl. Die Reihenfolge der Liste ist die Reinigungsreihenfolge.",
-      "fields": {
-        "rooms": {
-          "name": "Räume",
-          "description": "Raumnamen (oder IDs) in der gewünschten Reihenfolge."
         }
       }
     },

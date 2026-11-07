@@ -19,9 +19,7 @@ from .const import (
     DOMAIN,
     SERVICE_CANCEL_ROOM_QUEUE,
     SERVICE_CLEAN_ROOMS,
-    SERVICE_CLEAN_SELECTED_ROOMS,
     SERVICE_GET_ROOMS,
-    SERVICE_SELECT_ROOMS,
     SERVICE_STATION_ACTION,
     STATION_ACTIONS,
 )
@@ -65,12 +63,6 @@ def async_setup_services(hass: HomeAssistant) -> None:
             **_CLEAN_OPTIONS,
         },
         "async_clean_rooms",
-    )
-    register(SERVICE_CLEAN_SELECTED_ROOMS, _CLEAN_OPTIONS, "async_clean_selected_rooms")
-    register(
-        SERVICE_SELECT_ROOMS,
-        {probatio.Required(ATTR_ROOMS): _ROOMS},
-        "async_select_rooms",
     )
     register(SERVICE_CANCEL_ROOM_QUEUE, None, "async_cancel_room_queue")
     register(

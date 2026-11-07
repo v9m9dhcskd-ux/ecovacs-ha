@@ -59,7 +59,7 @@ async def async_get_config_entry_diagnostics(
                 "rooms": {
                     "map_id": manager.map_id,
                     "rooms": [asdict(room) for room in manager.rooms.values()],
-                    "selection": manager.selection,
+                    "job_rooms": manager.order_rooms,
                     "sequential": manager.sequential,
                     "clean_type": manager.clean_type,
                     "queue_running": manager.queue_running,
