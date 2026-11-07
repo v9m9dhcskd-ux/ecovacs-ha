@@ -355,6 +355,11 @@ class RoomManager:
             await self._device.execute_command(count.set(cleanings))
 
         room_ids = list(room_ids)
+        # Show the rooms of this cleaning as selection, no matter how it was
+        # started (room switches, vacuum.clean_area, clean_rooms action)
+        if self.map_id is not None and self._selections.get(self.map_id) != room_ids:
+            self._selections[self.map_id] = list(room_ids)
+            self._async_changed(save=True)
         if not sequential or len(room_ids) == 1:
             await self._send_area_clean(room_ids, cleanings)
             return

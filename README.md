@@ -63,7 +63,9 @@ erscheinen die Änderungen von selbst.
    z. B. `Küche → Flur → Wohnzimmer`.
 2. Den Button **Ausgewählte Räume reinigen** drücken.
 
-Die Auswahl bleibt über Neustarts erhalten. Ein fertiges Dashboard-Beispiel liegt in
+Die Auswahl bleibt über Neustarts erhalten. Startest du eine Reinigung auf anderem Weg
+(„Reinigung nach Bereich“ im Staubsauger-Dialog, `vacuum.clean_area` oder
+`ecovacs_omni.clean_rooms`), übernehmen *Ausgewählte Räume* und die Raum-Schalter deren Räume. Ein fertiges Dashboard-Beispiel liegt in
 [`examples/dashboard.yaml`](examples/dashboard.yaml).
 
 ### Reihenfolge: „Räume nacheinander reinigen“

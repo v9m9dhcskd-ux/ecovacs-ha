@@ -42,8 +42,9 @@ async def test_current_room_and_last_job(
     hass: HomeAssistant, rooms_entry: MockConfigEntry
 ) -> None:
     """Current room and last job come from the T50 specific messages."""
+    # Planned room is shown while the robot still washes its mops
     await _message(hass, rooms_entry, "onCleanDataUpdate_V3", _clean_data(2, status=1))
-    assert hass.states.get("sensor.robbi_current_room").state == "unknown"
+    assert hass.states.get("sensor.robbi_current_room").state == "Flur"
     await _message(hass, rooms_entry, "onCleanDataUpdate_V3", _clean_data(2))
     assert hass.states.get("sensor.robbi_current_room").state == "Flur"
 
@@ -115,3 +116,53 @@ async def test_queue_accepts_room_from_job_report_without_cleaning_state(
     # No CLEANING state at all, the job end still moves on to the next room
     await _message(hass, rooms_entry, "onLastTimeStats", LAST_TIME_STATS)
     assert _area_values(mock_execute) == ["1,1", "1,2"]
+
+
+def _work_state(robot: str, station: str, paused: int = 0) -> bytes:
+    robot_state: dict[str, Any] = {"state": robot, "trigger": "app"}
+    if robot == "cleaning":
+        robot_state["cleanState"] = {"cid": "122", "type": "freeClean"}
+    return _raw(
+        {
+            "paused": paused,
+            "robotState": robot_state,
+            "stationState": {"state": station, "trigger": "app"},
+        }
+    )
+
+
+async def test_state_cleaning_while_washing_mops(
+    hass: HomeAssistant, init_integration: MockConfigEntry
+) -> None:
+    """A running job is shown as cleaning, also while the mops are washed."""
+    entry = init_integration
+    # Job accepted, mops are washed before the robot leaves (recorded T50)
+    await _message(hass, entry, "onWorkState", _work_state("cleaning", "washing"))
+    assert hass.states.get(VACUUM).state == "cleaning"
+    assert hass.states.get("sensor.robbi_station").state == "washing_mop"
+    # Charging contacts touched while washing mid-job
+    await _message(hass, entry, "onChargeState", _raw({"isCharging": 1}))
+    assert hass.states.get(VACUUM).state == "cleaning"
+    # Paused stays paused
+    await _message(
+        hass, entry, "onWorkState", _work_state("cleaning", "washing", paused=1)
+    )
+    assert hass.states.get(VACUUM).state == "paused"
+    # Job done: returning, then docked while the station empties the dust bin
+    await _message(hass, entry, "onWorkState", _work_state("idle", "goCharging"))
+    assert hass.states.get(VACUUM).state == "returning"
+    await _message(hass, entry, "onWorkState", _work_state("idle", "emptying"))
+    await _message(hass, entry, "onChargeState", _raw({"isCharging": 1}))
+    assert hass.states.get(VACUUM).state == "docked"
+
+
+async def test_clean_area_updates_selection(
+    hass: HomeAssistant, rooms_entry: MockConfigEntry, mock_execute: AsyncMock
+) -> None:
+    """Rooms cleaned via vacuum.clean_area show up as selected rooms."""
+    entity = hass.data["entity_components"]["vacuum"].get_entity(VACUUM)
+    await entity.async_clean_segments(["m1_3", "m1_1"])
+    await hass.async_block_till_done()
+    assert hass.states.get("sensor.robbi_selected_rooms").state == "Wohnzimmer → Küche"
+    assert hass.states.get("switch.robbi_room_wohnzimmer").state == "on"
+    assert hass.states.get("switch.robbi_room_flur").state == "off"
