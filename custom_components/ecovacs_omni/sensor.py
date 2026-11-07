@@ -182,7 +182,7 @@ async def async_setup_entry(
             entities.append(EcovacsOmniErrorSensor(device, caps.error))
         if caps.map and caps.clean.action.area:
             manager = controller.room_manager(device)
-            entities.append(SelectedRoomsSensor(device, manager))
+            entities.append(JobRoomsSensor(device, manager))
             entities.append(RoomQueueSensor(device, manager))
             entities.append(ActiveRoomSensor(device, manager))
     async_add_entities(entities)
@@ -275,17 +275,17 @@ class _RoomManagerSensor(EcovacsOmniEntity[None], SensorEntity):
         self.async_on_remove(self._manager.async_add_listener(on_change))
 
 
-class SelectedRoomsSensor(_RoomManagerSensor):
-    """Shows the selected rooms in cleaning order."""
+class JobRoomsSensor(_RoomManagerSensor):
+    """Rooms of the current or last cleaning order, in cleaning order."""
 
     entity_description = SensorEntityDescription(
-        key="selected_rooms", translation_key="selected_rooms"
+        key="job_rooms", translation_key="job_rooms"
     )
 
     @property
     def native_value(self) -> StateType:
-        """Return the selected rooms, e.g. "Küche → Flur"."""
-        names = [self._manager.room_name(i) for i in self._manager.selection]
+        """Return the rooms, e.g. "Küche → Flur"."""
+        names = [self._manager.room_name(i) for i in self._manager.order_rooms]
         if not names:
             return None
         text = " → ".join(names)
@@ -294,11 +294,11 @@ class SelectedRoomsSensor(_RoomManagerSensor):
     @property
     def extra_state_attributes(self) -> dict[str, Any]:
         """Return ids and names."""
-        selection = self._manager.selection
+        order = self._manager.order_rooms
         return {
-            "room_ids": selection,
-            "room_names": [self._manager.room_name(i) for i in selection],
-            "count": len(selection),
+            "room_ids": order,
+            "room_names": [self._manager.room_name(i) for i in order],
+            "count": len(order),
         }
 
 

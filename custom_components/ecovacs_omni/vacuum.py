@@ -63,7 +63,7 @@ async def async_setup_entry(
 class EcovacsOmniVacuum(EcovacsOmniEntity[Capabilities], StateVacuumEntity):
     """The robot itself."""
 
-    _unrecorded_attributes = frozenset({"rooms", "selected_rooms", "room_queue"})
+    _unrecorded_attributes = frozenset({"rooms", "job_rooms", "room_queue"})
     _attr_supported_features = (
         VacuumEntityFeature.PAUSE
         | VacuumEntityFeature.STOP
@@ -125,11 +125,11 @@ class EcovacsOmniVacuum(EcovacsOmniEntity[Capabilities], StateVacuumEntity):
 
     @property
     def extra_state_attributes(self) -> Mapping[str, Any]:
-        """Expose rooms, selection and queue for dashboards and templates."""
+        """Expose rooms, rooms of the job and queue for dashboards and templates."""
         rooms = self._rooms
         return {
             "rooms": {room.name: room.id for room in rooms.rooms.values()},
-            "selected_rooms": [rooms.room_name(i) for i in rooms.selection],
+            "job_rooms": [rooms.room_name(i) for i in rooms.order_rooms],
             "room_queue": {
                 "running": rooms.queue_running,
                 "current": (
@@ -279,28 +279,6 @@ class EcovacsOmniVacuum(EcovacsOmniEntity[Capabilities], StateVacuumEntity):
             room_ids, sequential=sequential, cleanings=cleanings
         )
 
-    async def async_clean_selected_rooms(
-        self,
-        sequential: bool | None = None,
-        cleanings: int | None = None,
-        work_mode: str | None = None,
-        fan_speed: str | None = None,
-        water_amount: str | int | None = None,
-    ) -> None:
-        """Clean the rooms selected with the room switches."""
-        await self._rooms.async_apply_settings(
-            work_mode=work_mode, fan_speed=fan_speed, water_amount=water_amount
-        )
-        await self._rooms.async_clean(
-            self._rooms.selection, sequential=sequential, cleanings=cleanings
-        )
-
-    async def async_select_rooms(self, rooms: list[str]) -> None:
-        """Replace the room selection (order = list order)."""
-        self._rooms.async_set_selection(
-            self._rooms.resolve_rooms(rooms) if rooms else []
-        )
-
     async def async_cancel_room_queue(self) -> None:
         """Cancel the queue, the robot finishes the current room."""
         await self._rooms.async_cancel_queue()
@@ -319,9 +297,8 @@ class EcovacsOmniVacuum(EcovacsOmniEntity[Capabilities], StateVacuumEntity):
                 {
                     "id": room.id,
                     "name": room.name,
-                    "selected": room.id in self._rooms.selection,
                 }
                 for room in self._rooms.rooms.values()
             ],
-            "selection": [self._rooms.room_name(i) for i in self._rooms.selection],
+            "job_rooms": [self._rooms.room_name(i) for i in self._rooms.order_rooms],
         }

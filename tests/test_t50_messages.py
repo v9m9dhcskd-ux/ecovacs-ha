@@ -156,13 +156,12 @@ async def test_state_cleaning_while_washing_mops(
     assert hass.states.get(VACUUM).state == "docked"
 
 
-async def test_clean_area_updates_selection(
+async def test_clean_area_updates_job_rooms(
     hass: HomeAssistant, rooms_entry: MockConfigEntry, mock_execute: AsyncMock
 ) -> None:
-    """Rooms cleaned via vacuum.clean_area show up as selected rooms."""
+    """Rooms cleaned via vacuum.clean_area show up as rooms of the job."""
     entity = hass.data["entity_components"]["vacuum"].get_entity(VACUUM)
     await entity.async_clean_segments(["m1_3", "m1_1"])
     await hass.async_block_till_done()
-    assert hass.states.get("sensor.robbi_selected_rooms").state == "Wohnzimmer → Küche"
-    assert hass.states.get("switch.robbi_room_wohnzimmer").state == "on"
-    assert hass.states.get("switch.robbi_room_flur").state == "off"
+    state = hass.states.get("sensor.robbi_rooms_of_the_job")
+    assert state.state == "Wohnzimmer → Küche"

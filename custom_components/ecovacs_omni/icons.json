@@ -18,12 +18,6 @@
       "clean_all": {
         "default": "mdi:home-floor-a"
       },
-      "clean_selected_rooms": {
-        "default": "mdi:floor-plan"
-      },
-      "clear_room_selection": {
-        "default": "mdi:selection-remove"
-      },
       "cancel_room_queue": {
         "default": "mdi:playlist-remove"
       },
@@ -160,9 +154,6 @@
       "error": {
         "default": "mdi:alert-circle"
       },
-      "selected_rooms": {
-        "default": "mdi:format-list-numbered"
-      },
       "room_queue": {
         "default": "mdi:playlist-play"
       },
@@ -216,6 +207,9 @@
       },
       "current_room": {
         "default": "mdi:map-marker-radius"
+      },
+      "job_rooms": {
+        "default": "mdi:format-list-numbered"
       }
     },
     "switch": {
@@ -251,24 +245,12 @@
       },
       "sequential_rooms": {
         "default": "mdi:order-numeric-ascending"
-      },
-      "room": {
-        "default": "mdi:checkbox-blank-outline",
-        "state": {
-          "on": "mdi:checkbox-marked"
-        }
       }
     }
   },
   "services": {
     "clean_rooms": {
       "service": "mdi:floor-plan"
-    },
-    "clean_selected_rooms": {
-      "service": "mdi:floor-plan"
-    },
-    "select_rooms": {
-      "service": "mdi:format-list-numbered"
     },
     "cancel_room_queue": {
       "service": "mdi:playlist-remove"

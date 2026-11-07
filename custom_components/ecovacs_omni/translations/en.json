@@ -56,7 +56,7 @@
       "message": "Unknown room \"{room}\". Available rooms: {rooms}"
     },
     "no_rooms_selected": {
-      "message": "No rooms selected."
+      "message": "No rooms given."
     },
     "not_supported": {
       "message": "\"{option}\" is not supported by this robot."
@@ -86,12 +86,6 @@
     "button": {
       "clean_all": {
         "name": "Clean whole home"
-      },
-      "clean_selected_rooms": {
-        "name": "Clean selected rooms"
-      },
-      "clear_room_selection": {
-        "name": "Clear room selection"
       },
       "cancel_room_queue": {
         "name": "Cancel room queue"
@@ -267,8 +261,8 @@
           }
         }
       },
-      "selected_rooms": {
-        "name": "Selected rooms"
+      "job_rooms": {
+        "name": "Rooms of the job"
       },
       "room_queue": {
         "name": "Room queue"
@@ -358,9 +352,6 @@
       },
       "sequential_rooms": {
         "name": "Clean rooms one after another"
-      },
-      "room": {
-        "name": "Room {room}"
       }
     },
     "vacuum": {
@@ -432,42 +423,6 @@
         "water_amount": {
           "name": "Water amount",
           "description": "Water amount for mopping (T50: number 0-50)."
-        }
-      }
-    },
-    "clean_selected_rooms": {
-      "name": "Clean selected rooms",
-      "description": "Cleans the rooms selected with the room switches, in the order they were selected.",
-      "fields": {
-        "sequential": {
-          "name": "One after another",
-          "description": "Clean each room separately so the order is guaranteed. Default: the 'Clean rooms one after another' switch."
-        },
-        "cleanings": {
-          "name": "Passes",
-          "description": "How often each room is cleaned."
-        },
-        "work_mode": {
-          "name": "Cleaning mode",
-          "description": "Vacuum, mop or both."
-        },
-        "fan_speed": {
-          "name": "Suction power",
-          "description": "Suction power for this cleaning."
-        },
-        "water_amount": {
-          "name": "Water amount",
-          "description": "Water amount for mopping (T50: number 0-50)."
-        }
-      }
-    },
-    "select_rooms": {
-      "name": "Select rooms",
-      "description": "Replaces the room selection. The list order is the cleaning order.",
-      "fields": {
-        "rooms": {
-          "name": "Rooms",
-          "description": "Room names (or ids) in the order they should be cleaned."
         }
       }
     },

@@ -38,14 +38,6 @@ async def _clean_all(manager: RoomManager, device: Device) -> None:
     )
 
 
-async def _clean_selected(manager: RoomManager, device: Device) -> None:
-    await manager.async_clean(manager.selection)
-
-
-async def _clear_selection(manager: RoomManager, device: Device) -> None:
-    manager.async_set_selection([])
-
-
 async def _cancel_queue(manager: RoomManager, device: Device) -> None:
     await manager.async_cancel_queue()
 
@@ -55,16 +47,6 @@ CLEAN_ALL = RoomButtonDescription(
 )
 
 ROOM_BUTTONS: tuple[RoomButtonDescription, ...] = (
-    RoomButtonDescription(
-        key="clean_selected_rooms",
-        translation_key="clean_selected_rooms",
-        press_fn=_clean_selected,
-    ),
-    RoomButtonDescription(
-        key="clear_room_selection",
-        translation_key="clear_room_selection",
-        press_fn=_clear_selection,
-    ),
     RoomButtonDescription(
         key="cancel_room_queue",
         translation_key="cancel_room_queue",

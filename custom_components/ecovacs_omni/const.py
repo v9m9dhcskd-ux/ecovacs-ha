@@ -49,8 +49,6 @@ SEQUENTIAL_START_TIMEOUT = 30 * 60
 SEQUENTIAL_ROOM_TIMEOUT = 4 * 60 * 60  # max seconds for a single room
 
 SERVICE_CLEAN_ROOMS = "clean_rooms"
-SERVICE_CLEAN_SELECTED_ROOMS = "clean_selected_rooms"
-SERVICE_SELECT_ROOMS = "select_rooms"
 SERVICE_CANCEL_ROOM_QUEUE = "cancel_room_queue"
 SERVICE_STATION_ACTION = "station_action"
 SERVICE_GET_ROOMS = "get_rooms"

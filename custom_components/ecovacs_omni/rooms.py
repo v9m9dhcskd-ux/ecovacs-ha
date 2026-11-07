@@ -1,4 +1,4 @@
-"""Room selection and ordered (sequential) room cleaning."""
+"""Rooms of the map, rooms of the last cleaning order and the room queue."""
 
 from __future__ import annotations
 
@@ -59,7 +59,7 @@ class RoomQueueAbortedError(HomeAssistantError):
 
 
 class RoomManager:
-    """Keeps the rooms, the user's ordered room selection and the room queue."""
+    """Keeps the rooms, the rooms of the last cleaning order and the room queue."""
 
     def __init__(self, hass: HomeAssistant, device: Device) -> None:
         """Initialize the manager."""
@@ -71,7 +71,8 @@ class RoomManager:
         )
         self.map_id: str | None = None
         self.rooms: dict[int, RoomInfo] = {}
-        self._selections: dict[str, list[int]] = {}
+        # Rooms of the last cleaning order per map, in cleaning order
+        self._orders: dict[str, list[int]] = {}
         self.sequential: bool = True
         # "freeClean" (newer robots, e.g. T50) or "spotArea" (older robots).
         # Detected automatically on the first room cleaning.
@@ -93,7 +94,6 @@ class RoomManager:
         self.queue_total: int = 0
 
         self._listeners: list[Callable[[], None]] = []
-        self._rooms_listeners: list[Callable[[], None]] = []
         self._unsub_rooms: Callable[[], None] | None = None
 
     # ------------------------------------------------------------------ setup
@@ -101,9 +101,9 @@ class RoomManager:
     async def async_load(self) -> None:
         """Load persisted data and start listening for room updates."""
         if data := await self._store.async_load():
-            self._selections = {
+            self._orders = {
                 str(map_id): [int(i) for i in ids]
-                for map_id, ids in data.get("selections", {}).items()
+                for map_id, ids in data.get("orders", {}).items()
             }
             self.sequential = bool(data.get("sequential", True))
             if data.get("clean_type") in (FREE_CLEAN, SPOT_AREA):
@@ -129,28 +129,18 @@ class RoomManager:
             name = room.name.strip() if room.name else ""
             rooms[room.id] = RoomInfo(room.id, name or f"Room {room.id}")
         self.rooms = rooms
-        # Drop selected rooms which don't exist anymore
-        if (selection := self._selections.get(event.map_id)) is not None:
-            self._selections[event.map_id] = [i for i in selection if i in rooms]
-        for listener in list(self._rooms_listeners):
-            listener()
+        # Drop rooms which don't exist anymore
+        if (order := self._orders.get(event.map_id)) is not None:
+            self._orders[event.map_id] = [i for i in order if i in rooms]
         self._async_changed()
 
     # -------------------------------------------------------------- listeners
 
     @callback
     def async_add_listener(self, listener: Callable[[], None]) -> Callable[[], None]:
-        """Listen for any change (selection, queue, rooms)."""
+        """Listen for any change (order, job, queue, rooms)."""
         self._listeners.append(listener)
         return lambda: self._listeners.remove(listener)
-
-    @callback
-    def async_add_rooms_listener(
-        self, listener: Callable[[], None]
-    ) -> Callable[[], None]:
-        """Listen for a new room list."""
-        self._rooms_listeners.append(listener)
-        return lambda: self._rooms_listeners.remove(listener)
 
     @callback
     def _async_changed(self, *, save: bool = False) -> None:
@@ -161,49 +151,25 @@ class RoomManager:
 
     def _data_to_store(self) -> dict[str, Any]:
         return {
-            "selections": self._selections,
+            "orders": self._orders,
             "sequential": self.sequential,
             "clean_type": self.clean_type,
         }
 
-    # -------------------------------------------------------------- selection
+    # ------------------------------------------------------------------ order
 
     @property
-    def selection(self) -> list[int]:
-        """Return the ordered room selection of the active map."""
+    def order_rooms(self) -> list[int]:
+        """Return the rooms of the last cleaning order (active map), in order."""
         if self.map_id is None:
             return []
-        return list(self._selections.get(self.map_id, []))
+        return list(self._orders.get(self.map_id, []))
 
     def room_name(self, room_id: int) -> str:
         """Return the name of a room."""
         if room := self.rooms.get(room_id):
             return room.name
         return f"Room {room_id}"
-
-    @callback
-    def async_set_selected(self, room_id: int, selected: bool) -> None:
-        """Select (append at the end) or deselect a room."""
-        if self.map_id is None:
-            return
-        selection = self._selections.setdefault(self.map_id, [])
-        if selected and room_id not in selection:
-            selection.append(room_id)
-        elif not selected and room_id in selection:
-            selection.remove(room_id)
-        else:
-            return
-        self._async_changed(save=True)
-
-    @callback
-    def async_set_selection(self, room_ids: Sequence[int]) -> None:
-        """Replace the whole selection (keeps the given order)."""
-        if self.map_id is None:
-            raise ServiceValidationError(
-                translation_domain=DOMAIN, translation_key="no_rooms"
-            )
-        self._selections[self.map_id] = list(dict.fromkeys(room_ids))
-        self._async_changed(save=True)
 
     @callback
     def async_set_job(self, job_rooms: set[int], active_room: int | None) -> None:
@@ -355,10 +321,9 @@ class RoomManager:
             await self._device.execute_command(count.set(cleanings))
 
         room_ids = list(room_ids)
-        # Show the rooms of this cleaning as selection, no matter how it was
-        # started (room switches, vacuum.clean_area, clean_rooms action)
-        if self.map_id is not None and self._selections.get(self.map_id) != room_ids:
-            self._selections[self.map_id] = list(room_ids)
+        # Remember the rooms of this order ("rooms of the job" sensor)
+        if self.map_id is not None and self._orders.get(self.map_id) != room_ids:
+            self._orders[self.map_id] = list(room_ids)
             self._async_changed(save=True)
         if not sequential or len(room_ids) == 1:
             await self._send_area_clean(room_ids, cleanings)
