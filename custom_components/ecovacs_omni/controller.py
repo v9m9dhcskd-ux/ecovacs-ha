@@ -32,6 +32,7 @@ from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers import aiohttp_client, device_registry as dr
 
 from .const import CONF_ACCOUNT_CREDENTIALS, DOMAIN
+from .recorder import DebugRecorder
 from .rooms import RoomManager
 
 _LOGGER = logging.getLogger(__name__)
@@ -49,6 +50,7 @@ class EcovacsOmniController:
         self._country: str = config[CONF_COUNTRY]
         self._devices: list[Device] = []
         self._room_managers: dict[str, RoomManager] = {}
+        self._recorders: dict[str, DebugRecorder] = {}
         self._unsubscribers: list[Callable[[], None]] = []
 
         self._authenticator = Authenticator(
@@ -85,6 +87,8 @@ class EcovacsOmniController:
                 mqtt = await self._get_mqtt_client()
 
                 async def _init(device: Device) -> None:
+                    # Must be installed before initialize() subscribes to MQTT
+                    self._recorders[device.device_info["did"]] = DebugRecorder(device)
                     await device.initialize(mqtt)
                     self._subscribe_device_info_events(device)
                     self._devices.append(device)
@@ -182,6 +186,10 @@ class EcovacsOmniController:
     def devices(self) -> list[Device]:
         """Return all connected devices."""
         return self._devices
+
+    def recorder(self, device: Device) -> DebugRecorder | None:
+        """Return the debug recorder of a device."""
+        return self._recorders.get(device.device_info["did"])
 
     def room_manager(self, device: Device) -> RoomManager:
         """Return the room manager of a device."""
