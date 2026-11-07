@@ -153,7 +153,9 @@ class EcovacsOmniController:
         registry = dr.async_get(self._hass)
 
         def device_entry() -> dr.DeviceEntry | None:
-            return registry.async_get_device(identifiers={identifier})
+            return registry.async_get_device_by_identifier(
+                identifier, self._entry.entry_id
+            )
 
         async def on_firmware(event: FirmwareEvent) -> None:
             if entry := device_entry():

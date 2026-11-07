@@ -125,6 +125,10 @@ Statt Namen gehen auch Raum-IDs (`rooms: [3, 1]`). Groß- und Kleinschreibung sp
   waschen, Mopps trocknen und Station reinigen werden trotzdem angeboten, weil die Station sie
   beherrscht. Das Attribut `listed_by_library` zeigt, welche davon ungetestet sind. Bitte melden,
   ob sie bei dir funktionieren.
+- **Reinigungsspur auf der Karte:** `deebot-client` holt die gefahrene Spur nur einmal beim Start
+  und wartet dann auf Meldungen des Roboters, die der T50 nicht (passend) schickt. Während der
+  Roboter reinigt oder zurückfährt, fragt diese Integration deshalb alle 15 Sekunden die neuen
+  Spurpunkte und die Position ab.
 - **Cloud:** Ohne Internet oder bei einer Störung der Ecovacs-Server ist der Roboter nicht steuerbar.
 
 ## Fehlersuche

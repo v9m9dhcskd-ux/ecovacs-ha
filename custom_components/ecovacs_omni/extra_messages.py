@@ -13,6 +13,9 @@ Recorded from a real T50 MAX PRO OMNI (class c8rj4y, firmware 1.62.0):
 - ``onWorkState``: ``robotState.state`` is ``cleaning`` for the whole job,
   also while the robot sits in the station washing its mops (before it
   leaves and in the middle of a job). deebot-client reports that as docked.
+- ``onMapTrace_V2``: the driven line. deebot-client only understands it if it
+  has the same fields as ``onMapTrace`` (``traceStart``, ``totalCount``,
+  ``traceValue``); we also accept it without ``totalCount``.
 """
 
 from __future__ import annotations
@@ -23,6 +26,7 @@ from typing import Any
 
 from deebot_client.device import Device
 from deebot_client.events import CleanJobStatus, ReportStatsEvent, StateEvent
+from deebot_client.events.map import MapTraceEvent
 from deebot_client.models import State
 
 from .rooms import RoomManager
@@ -51,7 +55,11 @@ def _body_data(raw: Any) -> Any:
 
 
 class ExtraMessageHandler:
-    """Turns unsupported robot messages into events and room manager updates."""
+    """Turns unsupported robot messages into events and room manager updates.
+
+    Also called with the answers of commands (name of the command, e.g.
+    ``getWorkState``), because deebot-client handles them like messages.
+    """
 
     def __init__(self, device: Device, manager: RoomManager) -> None:
         """Initialize the handler."""
@@ -65,9 +73,11 @@ class ExtraMessageHandler:
             self._on_last_time_stats(_body_data(raw))
         elif name in ("onCleanDataUpdate_V3", "onCleanDataUpdate_V2"):
             self._on_clean_data(_body_data(raw))
-        elif name == "onWorkState":
+        elif name in ("onMapTrace_V2", "onMapTrace"):
+            self._on_map_trace(_body_data(raw))
+        elif name in ("onWorkState", "getWorkState"):
             self._on_work_state(_body_data(raw))
-        elif name == "onChargeState" and self._job_running:
+        elif name in ("onChargeState", "getChargeState") and self._job_running:
             # Charging contacts are touched while washing mops mid-job,
             # deebot-client then reports docked although the job continues
             self._device.events.notify(StateEvent(State.CLEANING))
@@ -85,6 +95,23 @@ class ExtraMessageHandler:
         ):
             # The job is running, the robot only washes its mops in the station
             self._device.events.notify(StateEvent(State.CLEANING))
+
+    def _on_map_trace(self, data: Any) -> None:
+        if self._device.capabilities.map is None or not isinstance(data, dict):
+            return
+        trace = data.get("traceValue")
+        # Without the start index we can't tell new points from a new trace
+        if not isinstance(trace, str) or not trace.strip() or "traceStart" not in data:
+            return
+        try:
+            start = int(data["traceStart"])
+            total = int(data.get("totalCount", start + int(data.get("pointCount", 0))))
+        except TypeError, ValueError:
+            return
+        event = MapTraceEvent(start=start, total=total, data=trace)
+        # Already handled by deebot-client (same event, the bus skips it anyway)
+        if self._device.events.get_last_event(MapTraceEvent) != event:
+            self._device.events.notify(event)
 
     def _on_last_time_stats(self, data: Any) -> None:
         if not isinstance(data, dict):
