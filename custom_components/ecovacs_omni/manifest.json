@@ -1,0 +1,14 @@
+{
+  "domain": "ecovacs_omni",
+  "name": "Ecovacs Omni",
+  "codeowners": ["@v9m9dhcskd-ux"],
+  "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/v9m9dhcskd-ux/ecovacs-ha",
+  "integration_type": "hub",
+  "iot_class": "cloud_push",
+  "issue_tracker": "https://github.com/v9m9dhcskd-ux/ecovacs-ha/issues",
+  "loggers": ["deebot_client"],
+  "requirements": ["deebot-client==18.7.0"],
+  "version": "0.1.0"
+}

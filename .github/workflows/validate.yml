@@ -1,0 +1,38 @@
+name: Validate
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+
+jobs:
+  hassfest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: home-assistant/actions/hassfest@master
+
+  hacs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hacs/action@main
+        with:
+          category: integration
+          # Remove once the repository has topics, a description and a release
+          ignore: brands topics description
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Install
+        run: |
+          uv venv -p 3.14
+          uv pip install -r requirements_test.txt
+      - name: Ruff
+        run: uvx ruff check . && uvx ruff format --check .
+      - name: Pytest
+        run: .venv/bin/python -m pytest -q

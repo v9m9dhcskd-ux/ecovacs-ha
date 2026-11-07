@@ -1,0 +1,484 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Ecovacs account",
+        "description": "Log in with the account you use in the Ecovacs Home app.",
+        "data": {
+          "username": "E-mail",
+          "password": "Password",
+          "country": "Country"
+        },
+        "data_description": {
+          "country": "The country of your Ecovacs account (decides which servers are used)."
+        }
+      },
+      "device_verification": {
+        "title": "Verification",
+        "description": "Ecovacs sent a verification code to {username}. Enter it to trust Home Assistant.",
+        "data": {
+          "verification_code": "Verification code"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Log in again",
+        "description": "Enter the Ecovacs password for {username}.",
+        "data": {
+          "password": "Password"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect",
+      "invalid_auth": "Invalid e-mail or password",
+      "invalid_verification_code": "The verification code is invalid or expired.",
+      "unknown": "Unexpected error"
+    },
+    "abort": {
+      "already_configured": "Account is already configured",
+      "reauth_successful": "Re-authentication was successful"
+    }
+  },
+  "exceptions": {
+    "device_verification_required": {
+      "message": "Ecovacs requires a new device verification."
+    },
+    "invalid_auth": {
+      "message": "Invalid credentials."
+    },
+    "setup_error": {
+      "message": "Could not connect to Ecovacs."
+    },
+    "no_rooms": {
+      "message": "The robot did not report any rooms yet. Is a map with rooms saved?"
+    },
+    "unknown_room": {
+      "message": "Unknown room \"{room}\". Available rooms: {rooms}"
+    },
+    "no_rooms_selected": {
+      "message": "No rooms selected."
+    },
+    "not_supported": {
+      "message": "\"{option}\" is not supported by this robot."
+    },
+    "water_amount_range": {
+      "message": "Water amount must be between {min} and {max}."
+    },
+    "params_dict": {
+      "message": "Parameters must be a dictionary."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "water_mop_attached": {
+        "name": "Mop attached"
+      },
+      "docked": {
+        "name": "Docked"
+      }
+    },
+    "button": {
+      "clean_all": {
+        "name": "Clean whole home"
+      },
+      "clean_selected_rooms": {
+        "name": "Clean selected rooms"
+      },
+      "clear_room_selection": {
+        "name": "Clear room selection"
+      },
+      "cancel_room_queue": {
+        "name": "Cancel room queue"
+      },
+      "relocate": {
+        "name": "Relocate"
+      },
+      "station_action_empty_dustbin": {
+        "name": "Empty dustbin"
+      },
+      "station_action_wash_mop": {
+        "name": "Wash mops"
+      },
+      "station_action_dry_mop": {
+        "name": "Dry mops"
+      },
+      "station_action_clean_base": {
+        "name": "Clean station"
+      },
+      "reset_lifespan_brush": {
+        "name": "Reset main brush"
+      },
+      "reset_lifespan_side_brush": {
+        "name": "Reset side brush"
+      },
+      "reset_lifespan_filter": {
+        "name": "Reset filter"
+      },
+      "reset_lifespan_hand_filter": {
+        "name": "Reset hand filter"
+      },
+      "reset_lifespan_unit_care": {
+        "name": "Reset unit care"
+      },
+      "reset_lifespan_round_mop": {
+        "name": "Reset mop pads"
+      },
+      "reset_lifespan_cleaning_solution": {
+        "name": "Reset cleaning solution"
+      },
+      "reset_lifespan_heavy_duty_cleaning_solution": {
+        "name": "Reset heavy-duty cleaning solution"
+      },
+      "reset_lifespan_dust_bag": {
+        "name": "Reset dust bag"
+      },
+      "reset_lifespan_station_filter": {
+        "name": "Reset station filter"
+      },
+      "reset_lifespan_mop_washing_tray": {
+        "name": "Reset mop washing tray"
+      },
+      "reset_lifespan_sewage_box": {
+        "name": "Reset dirty water tank"
+      },
+      "reset_lifespan_strainer": {
+        "name": "Reset strainer"
+      },
+      "reset_lifespan_water_sink": {
+        "name": "Reset water sink"
+      },
+      "reset_lifespan_uv_sanitizer": {
+        "name": "Reset uv sanitizer"
+      },
+      "reset_lifespan_air_freshener": {
+        "name": "Reset air freshener"
+      }
+    },
+    "image": {
+      "map": {
+        "name": "Map"
+      }
+    },
+    "number": {
+      "clean_count": {
+        "name": "Passes"
+      },
+      "water_amount": {
+        "name": "Water amount"
+      },
+      "volume": {
+        "name": "Volume"
+      }
+    },
+    "select": {
+      "work_mode": {
+        "name": "Cleaning mode",
+        "state": {
+          "vacuum_and_mop": "Vacuum & mop",
+          "vacuum": "Vacuum only",
+          "mop": "Mop only",
+          "mop_after_vacuum": "Mop after vacuum"
+        }
+      },
+      "water_amount": {
+        "name": "Water amount",
+        "state": {
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High",
+          "ultrahigh": "Ultra high"
+        }
+      },
+      "auto_empty_frequency": {
+        "name": "Auto-empty frequency",
+        "state": {
+          "auto": "Auto",
+          "smart": "Smart",
+          "min_10": "10 minutes",
+          "min_15": "15 minutes",
+          "min_25": "25 minutes"
+        }
+      },
+      "efficiency_mode": {
+        "name": "Efficiency mode",
+        "state": {
+          "standard_mode": "Standard",
+          "energy_efficient_mode": "Energy efficient"
+        }
+      },
+      "active_map": {
+        "name": "Active map"
+      }
+    },
+    "sensor": {
+      "stats_area": {
+        "name": "Area cleaned"
+      },
+      "stats_time": {
+        "name": "Cleaning duration"
+      },
+      "last_job": {
+        "name": "Last job",
+        "state": {
+          "cleaning": "Cleaning",
+          "finished": "Finished",
+          "finished_with_warnings": "Finished with warnings",
+          "manually_stopped": "Manually stopped"
+        }
+      },
+      "total_stats_area": {
+        "name": "Total area cleaned"
+      },
+      "total_stats_time": {
+        "name": "Total cleaning duration"
+      },
+      "total_stats_cleanings": {
+        "name": "Total cleanings"
+      },
+      "station_state": {
+        "name": "Station",
+        "state": {
+          "idle": "Idle",
+          "emptying_dustbin": "Emptying dustbin",
+          "washing_mop": "Washing mops",
+          "drying_mop": "Drying mops"
+        }
+      },
+      "network_ip": {
+        "name": "IP address"
+      },
+      "network_rssi": {
+        "name": "Wi-Fi signal"
+      },
+      "network_ssid": {
+        "name": "Wi-Fi network"
+      },
+      "error": {
+        "name": "Error",
+        "state_attributes": {
+          "description": {
+            "name": "Description"
+          }
+        }
+      },
+      "selected_rooms": {
+        "name": "Selected rooms"
+      },
+      "room_queue": {
+        "name": "Room queue"
+      },
+      "lifespan_brush": {
+        "name": "Main brush"
+      },
+      "lifespan_side_brush": {
+        "name": "Side brush"
+      },
+      "lifespan_filter": {
+        "name": "Filter"
+      },
+      "lifespan_hand_filter": {
+        "name": "Hand filter"
+      },
+      "lifespan_unit_care": {
+        "name": "Unit care"
+      },
+      "lifespan_round_mop": {
+        "name": "Mop pads"
+      },
+      "lifespan_cleaning_solution": {
+        "name": "Cleaning solution"
+      },
+      "lifespan_heavy_duty_cleaning_solution": {
+        "name": "Heavy-duty cleaning solution"
+      },
+      "lifespan_dust_bag": {
+        "name": "Dust bag"
+      },
+      "lifespan_station_filter": {
+        "name": "Station filter"
+      },
+      "lifespan_mop_washing_tray": {
+        "name": "Mop washing tray"
+      },
+      "lifespan_sewage_box": {
+        "name": "Dirty water tank"
+      },
+      "lifespan_strainer": {
+        "name": "Strainer"
+      },
+      "lifespan_water_sink": {
+        "name": "Water sink"
+      },
+      "lifespan_uv_sanitizer": {
+        "name": "UV sanitizer"
+      },
+      "lifespan_air_freshener": {
+        "name": "Air freshener"
+      }
+    },
+    "switch": {
+      "continuous_cleaning": {
+        "name": "Continue after charging"
+      },
+      "carpet_auto_fan_boost": {
+        "name": "Carpet boost"
+      },
+      "clean_preference": {
+        "name": "Use room settings"
+      },
+      "child_lock": {
+        "name": "Child lock"
+      },
+      "true_detect": {
+        "name": "Obstacle detection (TrueDetect)"
+      },
+      "advanced_mode": {
+        "name": "Advanced mode"
+      },
+      "voice_assistant": {
+        "name": "Voice assistant"
+      },
+      "ota": {
+        "name": "Automatic updates"
+      },
+      "multimap_state": {
+        "name": "Multiple maps"
+      },
+      "auto_empty": {
+        "name": "Auto-empty"
+      },
+      "sequential_rooms": {
+        "name": "Clean rooms one after another"
+      },
+      "room": {
+        "name": "Room {room}"
+      }
+    },
+    "vacuum": {
+      "vacuum": {
+        "state_attributes": {
+          "fan_speed": {
+            "state": {
+              "quiet": "Quiet",
+              "normal": "Standard",
+              "max": "Max",
+              "max_plus": "Max+"
+            }
+          }
+        }
+      }
+    }
+  },
+  "selector": {
+    "work_mode": {
+      "options": {
+        "vacuum_and_mop": "Vacuum & mop",
+        "vacuum": "Vacuum only",
+        "mop": "Mop only",
+        "mop_after_vacuum": "Mop after vacuum"
+      }
+    },
+    "fan_speed": {
+      "options": {
+        "quiet": "Quiet",
+        "normal": "Standard",
+        "max": "Max",
+        "max_plus": "Max+"
+      }
+    },
+    "station_action": {
+      "options": {
+        "empty_dustbin": "Empty dustbin",
+        "wash_mop": "Wash mops",
+        "dry_mop": "Dry mops",
+        "clean_base": "Clean station"
+      }
+    }
+  },
+  "services": {
+    "clean_rooms": {
+      "name": "Clean rooms",
+      "description": "Cleans the given rooms in the given order.",
+      "fields": {
+        "rooms": {
+          "name": "Rooms",
+          "description": "Room names (or ids) in the order they should be cleaned."
+        },
+        "sequential": {
+          "name": "One after another",
+          "description": "Clean each room separately so the order is guaranteed. Default: the 'Clean rooms one after another' switch."
+        },
+        "cleanings": {
+          "name": "Passes",
+          "description": "How often each room is cleaned."
+        },
+        "work_mode": {
+          "name": "Cleaning mode",
+          "description": "Vacuum, mop or both."
+        },
+        "fan_speed": {
+          "name": "Suction power",
+          "description": "Suction power for this cleaning."
+        },
+        "water_amount": {
+          "name": "Water amount",
+          "description": "Water amount for mopping (T50: number 0-50)."
+        }
+      }
+    },
+    "clean_selected_rooms": {
+      "name": "Clean selected rooms",
+      "description": "Cleans the rooms selected with the room switches, in the order they were selected.",
+      "fields": {
+        "sequential": {
+          "name": "One after another",
+          "description": "Clean each room separately so the order is guaranteed. Default: the 'Clean rooms one after another' switch."
+        },
+        "cleanings": {
+          "name": "Passes",
+          "description": "How often each room is cleaned."
+        },
+        "work_mode": {
+          "name": "Cleaning mode",
+          "description": "Vacuum, mop or both."
+        },
+        "fan_speed": {
+          "name": "Suction power",
+          "description": "Suction power for this cleaning."
+        },
+        "water_amount": {
+          "name": "Water amount",
+          "description": "Water amount for mopping (T50: number 0-50)."
+        }
+      }
+    },
+    "select_rooms": {
+      "name": "Select rooms",
+      "description": "Replaces the room selection. The list order is the cleaning order.",
+      "fields": {
+        "rooms": {
+          "name": "Rooms",
+          "description": "Room names (or ids) in the order they should be cleaned."
+        }
+      }
+    },
+    "cancel_room_queue": {
+      "name": "Cancel room queue",
+      "description": "Stops sending further rooms. The current room is finished."
+    },
+    "station_action": {
+      "name": "Station action",
+      "description": "Runs an action of the station.",
+      "fields": {
+        "action": {
+          "name": "Action",
+          "description": "The action to run."
+        }
+      }
+    },
+    "get_rooms": {
+      "name": "Get rooms",
+      "description": "Returns the rooms of the active map with their ids."
+    }
+  }
+}

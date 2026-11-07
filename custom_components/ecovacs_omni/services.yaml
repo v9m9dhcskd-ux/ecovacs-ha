@@ -1,0 +1,118 @@
+clean_rooms:
+  target:
+    entity:
+      domain: vacuum
+      integration: ecovacs_omni
+  fields:
+    rooms:
+      required: true
+      example: '["Küche", "Flur", "Wohnzimmer"]'
+      selector:
+        text:
+          multiple: true
+    sequential:
+      selector:
+        boolean: null
+    cleanings:
+      selector:
+        number:
+          min: 1
+          max: 4
+          mode: box
+    work_mode:
+      selector:
+        select:
+          translation_key: work_mode
+          options:
+          - vacuum_and_mop
+          - vacuum
+          - mop
+          - mop_after_vacuum
+    fan_speed:
+      selector:
+        select:
+          translation_key: fan_speed
+          options:
+          - quiet
+          - normal
+          - max
+          - max_plus
+    water_amount:
+      example: '25'
+      selector:
+        text: null
+clean_selected_rooms:
+  target:
+    entity:
+      domain: vacuum
+      integration: ecovacs_omni
+  fields:
+    sequential:
+      selector:
+        boolean: null
+    cleanings:
+      selector:
+        number:
+          min: 1
+          max: 4
+          mode: box
+    work_mode:
+      selector:
+        select:
+          translation_key: work_mode
+          options:
+          - vacuum_and_mop
+          - vacuum
+          - mop
+          - mop_after_vacuum
+    fan_speed:
+      selector:
+        select:
+          translation_key: fan_speed
+          options:
+          - quiet
+          - normal
+          - max
+          - max_plus
+    water_amount:
+      example: '25'
+      selector:
+        text: null
+select_rooms:
+  target:
+    entity:
+      domain: vacuum
+      integration: ecovacs_omni
+  fields:
+    rooms:
+      required: true
+      example: '["Küche", "Flur"]'
+      selector:
+        text:
+          multiple: true
+cancel_room_queue:
+  target:
+    entity:
+      domain: vacuum
+      integration: ecovacs_omni
+station_action:
+  target:
+    entity:
+      domain: vacuum
+      integration: ecovacs_omni
+  fields:
+    action:
+      required: true
+      selector:
+        select:
+          translation_key: station_action
+          options:
+          - empty_dustbin
+          - wash_mop
+          - dry_mop
+          - clean_base
+get_rooms:
+  target:
+    entity:
+      domain: vacuum
+      integration: ecovacs_omni

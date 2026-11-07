@@ -1,0 +1,484 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Ecovacs-Konto",
+        "description": "Melde dich mit dem Konto aus der Ecovacs-Home-App an.",
+        "data": {
+          "username": "E-Mail",
+          "password": "Passwort",
+          "country": "Land"
+        },
+        "data_description": {
+          "country": "Das Land deines Ecovacs-Kontos (bestimmt die verwendeten Server)."
+        }
+      },
+      "device_verification": {
+        "title": "Bestätigung",
+        "description": "Ecovacs hat einen Bestätigungscode an {username} geschickt. Gib ihn ein, um Home Assistant zu vertrauen.",
+        "data": {
+          "verification_code": "Bestätigungscode"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Erneut anmelden",
+        "description": "Gib das Ecovacs-Passwort für {username} ein.",
+        "data": {
+          "password": "Passwort"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Verbindung fehlgeschlagen",
+      "invalid_auth": "E-Mail oder Passwort falsch",
+      "invalid_verification_code": "Der Bestätigungscode ist falsch oder abgelaufen.",
+      "unknown": "Unerwarteter Fehler"
+    },
+    "abort": {
+      "already_configured": "Konto ist bereits eingerichtet",
+      "reauth_successful": "Erneute Anmeldung erfolgreich"
+    }
+  },
+  "exceptions": {
+    "device_verification_required": {
+      "message": "Ecovacs verlangt eine neue Gerätebestätigung."
+    },
+    "invalid_auth": {
+      "message": "Ungültige Anmeldedaten."
+    },
+    "setup_error": {
+      "message": "Keine Verbindung zu Ecovacs möglich."
+    },
+    "no_rooms": {
+      "message": "Der Roboter hat noch keine Räume gemeldet. Ist eine Karte mit Räumen gespeichert?"
+    },
+    "unknown_room": {
+      "message": "Unbekannter Raum \"{room}\". Vorhandene Räume: {rooms}"
+    },
+    "no_rooms_selected": {
+      "message": "Keine Räume ausgewählt."
+    },
+    "not_supported": {
+      "message": "\"{option}\" wird von diesem Roboter nicht unterstützt."
+    },
+    "water_amount_range": {
+      "message": "Die Wassermenge muss zwischen {min} und {max} liegen."
+    },
+    "params_dict": {
+      "message": "Parameter müssen ein Dictionary sein."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "water_mop_attached": {
+        "name": "Mopp montiert"
+      },
+      "docked": {
+        "name": "In der Station"
+      }
+    },
+    "button": {
+      "clean_all": {
+        "name": "Ganze Wohnung reinigen"
+      },
+      "clean_selected_rooms": {
+        "name": "Ausgewählte Räume reinigen"
+      },
+      "clear_room_selection": {
+        "name": "Raumauswahl leeren"
+      },
+      "cancel_room_queue": {
+        "name": "Raum-Warteschlange abbrechen"
+      },
+      "relocate": {
+        "name": "Neu orten"
+      },
+      "station_action_empty_dustbin": {
+        "name": "Staub absaugen"
+      },
+      "station_action_wash_mop": {
+        "name": "Mopps waschen"
+      },
+      "station_action_dry_mop": {
+        "name": "Mopps trocknen"
+      },
+      "station_action_clean_base": {
+        "name": "Station reinigen"
+      },
+      "reset_lifespan_brush": {
+        "name": "Hauptbürste zurücksetzen"
+      },
+      "reset_lifespan_side_brush": {
+        "name": "Seitenbürste zurücksetzen"
+      },
+      "reset_lifespan_filter": {
+        "name": "Filter zurücksetzen"
+      },
+      "reset_lifespan_hand_filter": {
+        "name": "Handfilter zurücksetzen"
+      },
+      "reset_lifespan_unit_care": {
+        "name": "Gerätepflege zurücksetzen"
+      },
+      "reset_lifespan_round_mop": {
+        "name": "Wischmopps zurücksetzen"
+      },
+      "reset_lifespan_cleaning_solution": {
+        "name": "Reinigungsmittel zurücksetzen"
+      },
+      "reset_lifespan_heavy_duty_cleaning_solution": {
+        "name": "Intensiv-Reinigungsmittel zurücksetzen"
+      },
+      "reset_lifespan_dust_bag": {
+        "name": "Staubbeutel zurücksetzen"
+      },
+      "reset_lifespan_station_filter": {
+        "name": "Stationsfilter zurücksetzen"
+      },
+      "reset_lifespan_mop_washing_tray": {
+        "name": "Mopp-Waschschale zurücksetzen"
+      },
+      "reset_lifespan_sewage_box": {
+        "name": "Schmutzwassertank zurücksetzen"
+      },
+      "reset_lifespan_strainer": {
+        "name": "Sieb zurücksetzen"
+      },
+      "reset_lifespan_water_sink": {
+        "name": "Wasserbecken zurücksetzen"
+      },
+      "reset_lifespan_uv_sanitizer": {
+        "name": "UV-Desinfektion zurücksetzen"
+      },
+      "reset_lifespan_air_freshener": {
+        "name": "Lufterfrischer zurücksetzen"
+      }
+    },
+    "image": {
+      "map": {
+        "name": "Karte"
+      }
+    },
+    "number": {
+      "clean_count": {
+        "name": "Durchgänge"
+      },
+      "water_amount": {
+        "name": "Wassermenge"
+      },
+      "volume": {
+        "name": "Lautstärke"
+      }
+    },
+    "select": {
+      "work_mode": {
+        "name": "Reinigungsmodus",
+        "state": {
+          "vacuum_and_mop": "Saugen & Wischen",
+          "vacuum": "Nur Saugen",
+          "mop": "Nur Wischen",
+          "mop_after_vacuum": "Erst Saugen, dann Wischen"
+        }
+      },
+      "water_amount": {
+        "name": "Wassermenge",
+        "state": {
+          "low": "Niedrig",
+          "medium": "Mittel",
+          "high": "Hoch",
+          "ultrahigh": "Sehr hoch"
+        }
+      },
+      "auto_empty_frequency": {
+        "name": "Absaug-Häufigkeit",
+        "state": {
+          "auto": "Automatisch",
+          "smart": "Smart",
+          "min_10": "10 Minuten",
+          "min_15": "15 Minuten",
+          "min_25": "25 Minuten"
+        }
+      },
+      "efficiency_mode": {
+        "name": "Effizienzmodus",
+        "state": {
+          "standard_mode": "Standard",
+          "energy_efficient_mode": "Energiesparend"
+        }
+      },
+      "active_map": {
+        "name": "Aktive Karte"
+      }
+    },
+    "sensor": {
+      "stats_area": {
+        "name": "Gereinigte Fläche"
+      },
+      "stats_time": {
+        "name": "Reinigungsdauer"
+      },
+      "last_job": {
+        "name": "Letzter Auftrag",
+        "state": {
+          "cleaning": "Reinigt",
+          "finished": "Fertig",
+          "finished_with_warnings": "Fertig mit Warnungen",
+          "manually_stopped": "Manuell gestoppt"
+        }
+      },
+      "total_stats_area": {
+        "name": "Gesamte gereinigte Fläche"
+      },
+      "total_stats_time": {
+        "name": "Gesamte Reinigungsdauer"
+      },
+      "total_stats_cleanings": {
+        "name": "Anzahl Reinigungen"
+      },
+      "station_state": {
+        "name": "Station",
+        "state": {
+          "idle": "Bereit",
+          "emptying_dustbin": "Saugt Staub ab",
+          "washing_mop": "Wäscht Mopps",
+          "drying_mop": "Trocknet Mopps"
+        }
+      },
+      "network_ip": {
+        "name": "IP-Adresse"
+      },
+      "network_rssi": {
+        "name": "WLAN-Signal"
+      },
+      "network_ssid": {
+        "name": "WLAN-Netz"
+      },
+      "error": {
+        "name": "Fehler",
+        "state_attributes": {
+          "description": {
+            "name": "Beschreibung"
+          }
+        }
+      },
+      "selected_rooms": {
+        "name": "Ausgewählte Räume"
+      },
+      "room_queue": {
+        "name": "Raum-Warteschlange"
+      },
+      "lifespan_brush": {
+        "name": "Hauptbürste"
+      },
+      "lifespan_side_brush": {
+        "name": "Seitenbürste"
+      },
+      "lifespan_filter": {
+        "name": "Filter"
+      },
+      "lifespan_hand_filter": {
+        "name": "Handfilter"
+      },
+      "lifespan_unit_care": {
+        "name": "Gerätepflege"
+      },
+      "lifespan_round_mop": {
+        "name": "Wischmopps"
+      },
+      "lifespan_cleaning_solution": {
+        "name": "Reinigungsmittel"
+      },
+      "lifespan_heavy_duty_cleaning_solution": {
+        "name": "Intensiv-Reinigungsmittel"
+      },
+      "lifespan_dust_bag": {
+        "name": "Staubbeutel"
+      },
+      "lifespan_station_filter": {
+        "name": "Stationsfilter"
+      },
+      "lifespan_mop_washing_tray": {
+        "name": "Mopp-Waschschale"
+      },
+      "lifespan_sewage_box": {
+        "name": "Schmutzwassertank"
+      },
+      "lifespan_strainer": {
+        "name": "Sieb"
+      },
+      "lifespan_water_sink": {
+        "name": "Wasserbecken"
+      },
+      "lifespan_uv_sanitizer": {
+        "name": "UV-Desinfektion"
+      },
+      "lifespan_air_freshener": {
+        "name": "Lufterfrischer"
+      }
+    },
+    "switch": {
+      "continuous_cleaning": {
+        "name": "Nach dem Laden fortsetzen"
+      },
+      "carpet_auto_fan_boost": {
+        "name": "Teppich-Boost"
+      },
+      "clean_preference": {
+        "name": "Raum-Einstellungen verwenden"
+      },
+      "child_lock": {
+        "name": "Kindersicherung"
+      },
+      "true_detect": {
+        "name": "Hinderniserkennung (TrueDetect)"
+      },
+      "advanced_mode": {
+        "name": "Erweiterter Modus"
+      },
+      "voice_assistant": {
+        "name": "Sprachassistent"
+      },
+      "ota": {
+        "name": "Automatische Updates"
+      },
+      "multimap_state": {
+        "name": "Mehrere Karten"
+      },
+      "auto_empty": {
+        "name": "Automatisch absaugen"
+      },
+      "sequential_rooms": {
+        "name": "Räume nacheinander reinigen"
+      },
+      "room": {
+        "name": "Raum {room}"
+      }
+    },
+    "vacuum": {
+      "vacuum": {
+        "state_attributes": {
+          "fan_speed": {
+            "state": {
+              "quiet": "Leise",
+              "normal": "Standard",
+              "max": "Stark",
+              "max_plus": "Max+"
+            }
+          }
+        }
+      }
+    }
+  },
+  "selector": {
+    "work_mode": {
+      "options": {
+        "vacuum_and_mop": "Saugen & Wischen",
+        "vacuum": "Nur Saugen",
+        "mop": "Nur Wischen",
+        "mop_after_vacuum": "Erst Saugen, dann Wischen"
+      }
+    },
+    "fan_speed": {
+      "options": {
+        "quiet": "Leise",
+        "normal": "Standard",
+        "max": "Stark",
+        "max_plus": "Max+"
+      }
+    },
+    "station_action": {
+      "options": {
+        "empty_dustbin": "Staub absaugen",
+        "wash_mop": "Mopps waschen",
+        "dry_mop": "Mopps trocknen",
+        "clean_base": "Station reinigen"
+      }
+    }
+  },
+  "services": {
+    "clean_rooms": {
+      "name": "Räume reinigen",
+      "description": "Reinigt die angegebenen Räume in der angegebenen Reihenfolge.",
+      "fields": {
+        "rooms": {
+          "name": "Räume",
+          "description": "Raumnamen (oder IDs) in der gewünschten Reihenfolge."
+        },
+        "sequential": {
+          "name": "Nacheinander",
+          "description": "Jeden Raum einzeln reinigen, damit die Reihenfolge garantiert ist. Standard: der Schalter 'Räume nacheinander reinigen'."
+        },
+        "cleanings": {
+          "name": "Durchgänge",
+          "description": "Wie oft jeder Raum gereinigt wird."
+        },
+        "work_mode": {
+          "name": "Reinigungsmodus",
+          "description": "Saugen, Wischen oder beides."
+        },
+        "fan_speed": {
+          "name": "Saugstärke",
+          "description": "Saugstärke für diese Reinigung."
+        },
+        "water_amount": {
+          "name": "Wassermenge",
+          "description": "Wassermenge beim Wischen (T50: Zahl 0-50)."
+        }
+      }
+    },
+    "clean_selected_rooms": {
+      "name": "Ausgewählte Räume reinigen",
+      "description": "Reinigt die über die Raum-Schalter ausgewählten Räume in der Reihenfolge der Auswahl.",
+      "fields": {
+        "sequential": {
+          "name": "Nacheinander",
+          "description": "Jeden Raum einzeln reinigen, damit die Reihenfolge garantiert ist. Standard: der Schalter 'Räume nacheinander reinigen'."
+        },
+        "cleanings": {
+          "name": "Durchgänge",
+          "description": "Wie oft jeder Raum gereinigt wird."
+        },
+        "work_mode": {
+          "name": "Reinigungsmodus",
+          "description": "Saugen, Wischen oder beides."
+        },
+        "fan_speed": {
+          "name": "Saugstärke",
+          "description": "Saugstärke für diese Reinigung."
+        },
+        "water_amount": {
+          "name": "Wassermenge",
+          "description": "Wassermenge beim Wischen (T50: Zahl 0-50)."
+        }
+      }
+    },
+    "select_rooms": {
+      "name": "Räume auswählen",
+      "description": "Ersetzt die Raumauswahl. Die Reihenfolge der Liste ist die Reinigungsreihenfolge.",
+      "fields": {
+        "rooms": {
+          "name": "Räume",
+          "description": "Raumnamen (oder IDs) in der gewünschten Reihenfolge."
+        }
+      }
+    },
+    "cancel_room_queue": {
+      "name": "Raum-Warteschlange abbrechen",
+      "description": "Schickt keine weiteren Räume mehr. Der aktuelle Raum wird fertig gereinigt."
+    },
+    "station_action": {
+      "name": "Stations-Aktion",
+      "description": "Führt eine Aktion der Station aus.",
+      "fields": {
+        "action": {
+          "name": "Aktion",
+          "description": "Die auszuführende Aktion."
+        }
+      }
+    },
+    "get_rooms": {
+      "name": "Räume abfragen",
+      "description": "Liefert die Räume der aktiven Karte mit ihren IDs."
+    }
+  }
+}
