@@ -46,6 +46,7 @@ async def async_get_config_entry_diagnostics(
                     "rooms": [asdict(room) for room in manager.rooms.values()],
                     "selection": manager.selection,
                     "sequential": manager.sequential,
+                    "clean_type": manager.clean_type,
                     "queue_running": manager.queue_running,
                 },
             }
@@ -59,7 +60,7 @@ async def async_get_config_entry_diagnostics(
 def _capability_names(obj: Any, prefix: str = "") -> list[str]:
     """List which capabilities a device has (only names, no values)."""
     names: list[str] = []
-    if not is_dataclass(obj):
+    if not _is_instance(obj):
         return names
     for field_name in obj.__dataclass_fields__:
         value = getattr(obj, field_name)
@@ -67,6 +68,11 @@ def _capability_names(obj: Any, prefix: str = "") -> list[str]:
             continue
         path = f"{prefix}{field_name}"
         names.append(path)
-        if is_dataclass(value):
+        if _is_instance(value):
             names.extend(_capability_names(value, f"{path}."))
     return names
+
+
+def _is_instance(value: Any) -> bool:
+    """Dataclass instance (is_dataclass is also True for dataclass classes)."""
+    return is_dataclass(value) and not isinstance(value, type)
