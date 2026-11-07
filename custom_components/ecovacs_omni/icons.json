@@ -1,0 +1,280 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "water_mop_attached": {
+        "default": "mdi:water-off",
+        "state": {
+          "on": "mdi:water"
+        }
+      },
+      "docked": {
+        "default": "mdi:home-export-outline",
+        "state": {
+          "on": "mdi:home-import-outline"
+        }
+      }
+    },
+    "button": {
+      "clean_all": {
+        "default": "mdi:home-floor-a"
+      },
+      "clean_selected_rooms": {
+        "default": "mdi:floor-plan"
+      },
+      "clear_room_selection": {
+        "default": "mdi:selection-remove"
+      },
+      "cancel_room_queue": {
+        "default": "mdi:playlist-remove"
+      },
+      "relocate": {
+        "default": "mdi:map-marker-question"
+      },
+      "station_action_empty_dustbin": {
+        "default": "mdi:delete-restore"
+      },
+      "station_action_wash_mop": {
+        "default": "mdi:water-sync"
+      },
+      "station_action_dry_mop": {
+        "default": "mdi:weather-windy"
+      },
+      "station_action_clean_base": {
+        "default": "mdi:home-floor-0"
+      },
+      "reset_lifespan_brush": {
+        "default": "mdi:broom"
+      },
+      "reset_lifespan_side_brush": {
+        "default": "mdi:broom"
+      },
+      "reset_lifespan_filter": {
+        "default": "mdi:air-filter"
+      },
+      "reset_lifespan_hand_filter": {
+        "default": "mdi:air-filter"
+      },
+      "reset_lifespan_unit_care": {
+        "default": "mdi:robot-vacuum"
+      },
+      "reset_lifespan_round_mop": {
+        "default": "mdi:circle-double"
+      },
+      "reset_lifespan_cleaning_solution": {
+        "default": "mdi:flask-outline"
+      },
+      "reset_lifespan_heavy_duty_cleaning_solution": {
+        "default": "mdi:flask-outline"
+      },
+      "reset_lifespan_dust_bag": {
+        "default": "mdi:delete-outline"
+      },
+      "reset_lifespan_station_filter": {
+        "default": "mdi:air-filter"
+      },
+      "reset_lifespan_mop_washing_tray": {
+        "default": "mdi:tray"
+      },
+      "reset_lifespan_sewage_box": {
+        "default": "mdi:water-alert-outline"
+      },
+      "reset_lifespan_strainer": {
+        "default": "mdi:filter-outline"
+      },
+      "reset_lifespan_water_sink": {
+        "default": "mdi:water-outline"
+      },
+      "reset_lifespan_uv_sanitizer": {
+        "default": "mdi:lightbulb-on-outline"
+      },
+      "reset_lifespan_air_freshener": {
+        "default": "mdi:scent"
+      }
+    },
+    "image": {
+      "map": {
+        "default": "mdi:map"
+      }
+    },
+    "number": {
+      "clean_count": {
+        "default": "mdi:counter"
+      },
+      "water_amount": {
+        "default": "mdi:water"
+      },
+      "volume": {
+        "default": "mdi:volume-high"
+      }
+    },
+    "select": {
+      "work_mode": {
+        "default": "mdi:cog"
+      },
+      "water_amount": {
+        "default": "mdi:water"
+      },
+      "auto_empty_frequency": {
+        "default": "mdi:delete-clock-outline"
+      },
+      "efficiency_mode": {
+        "default": "mdi:leaf"
+      },
+      "active_map": {
+        "default": "mdi:floor-plan"
+      }
+    },
+    "sensor": {
+      "stats_area": {
+        "default": "mdi:floor-plan"
+      },
+      "stats_time": {
+        "default": "mdi:timer-outline"
+      },
+      "last_job": {
+        "default": "mdi:clipboard-check-outline"
+      },
+      "total_stats_area": {
+        "default": "mdi:floor-plan"
+      },
+      "total_stats_time": {
+        "default": "mdi:timer-outline"
+      },
+      "total_stats_cleanings": {
+        "default": "mdi:counter"
+      },
+      "station_state": {
+        "default": "mdi:home",
+        "state": {
+          "emptying_dustbin": "mdi:delete-restore",
+          "washing_mop": "mdi:water-sync",
+          "drying_mop": "mdi:weather-windy"
+        }
+      },
+      "network_ip": {
+        "default": "mdi:ip-network-outline"
+      },
+      "network_ssid": {
+        "default": "mdi:wifi"
+      },
+      "error": {
+        "default": "mdi:alert-circle"
+      },
+      "selected_rooms": {
+        "default": "mdi:format-list-numbered"
+      },
+      "room_queue": {
+        "default": "mdi:playlist-play"
+      },
+      "lifespan_brush": {
+        "default": "mdi:broom"
+      },
+      "lifespan_side_brush": {
+        "default": "mdi:broom"
+      },
+      "lifespan_filter": {
+        "default": "mdi:air-filter"
+      },
+      "lifespan_hand_filter": {
+        "default": "mdi:air-filter"
+      },
+      "lifespan_unit_care": {
+        "default": "mdi:robot-vacuum"
+      },
+      "lifespan_round_mop": {
+        "default": "mdi:circle-double"
+      },
+      "lifespan_cleaning_solution": {
+        "default": "mdi:flask-outline"
+      },
+      "lifespan_heavy_duty_cleaning_solution": {
+        "default": "mdi:flask-outline"
+      },
+      "lifespan_dust_bag": {
+        "default": "mdi:delete-outline"
+      },
+      "lifespan_station_filter": {
+        "default": "mdi:air-filter"
+      },
+      "lifespan_mop_washing_tray": {
+        "default": "mdi:tray"
+      },
+      "lifespan_sewage_box": {
+        "default": "mdi:water-alert-outline"
+      },
+      "lifespan_strainer": {
+        "default": "mdi:filter-outline"
+      },
+      "lifespan_water_sink": {
+        "default": "mdi:water-outline"
+      },
+      "lifespan_uv_sanitizer": {
+        "default": "mdi:lightbulb-on-outline"
+      },
+      "lifespan_air_freshener": {
+        "default": "mdi:scent"
+      }
+    },
+    "switch": {
+      "continuous_cleaning": {
+        "default": "mdi:refresh-auto"
+      },
+      "carpet_auto_fan_boost": {
+        "default": "mdi:rug"
+      },
+      "clean_preference": {
+        "default": "mdi:tune"
+      },
+      "child_lock": {
+        "default": "mdi:lock"
+      },
+      "true_detect": {
+        "default": "mdi:eye-outline"
+      },
+      "advanced_mode": {
+        "default": "mdi:tune-variant"
+      },
+      "voice_assistant": {
+        "default": "mdi:microphone"
+      },
+      "ota": {
+        "default": "mdi:update"
+      },
+      "multimap_state": {
+        "default": "mdi:layers-outline"
+      },
+      "auto_empty": {
+        "default": "mdi:delete-restore"
+      },
+      "sequential_rooms": {
+        "default": "mdi:order-numeric-ascending"
+      },
+      "room": {
+        "default": "mdi:checkbox-blank-outline",
+        "state": {
+          "on": "mdi:checkbox-marked"
+        }
+      }
+    }
+  },
+  "services": {
+    "clean_rooms": {
+      "service": "mdi:floor-plan"
+    },
+    "clean_selected_rooms": {
+      "service": "mdi:floor-plan"
+    },
+    "select_rooms": {
+      "service": "mdi:format-list-numbered"
+    },
+    "cancel_room_queue": {
+      "service": "mdi:playlist-remove"
+    },
+    "station_action": {
+      "service": "mdi:home-floor-0"
+    },
+    "get_rooms": {
+      "service": "mdi:format-list-bulleted"
+    }
+  }
+}

@@ -1,0 +1,88 @@
+# Beispiel-Dashboard (Lovelace, YAML-Modus bzw. "Karte bearbeiten → Code-Editor").
+# Ersetze "robbi" durch den Namen deines Roboters und die Raum-Schalter durch
+# deine Räume (Einstellungen → Geräte & Dienste → Ecovacs Omni → Entitäten).
+type: vertical-stack
+cards:
+  - type: tile
+    entity: vacuum.robbi
+    features:
+      - type: vacuum-commands
+        commands: [start_pause, stop, return_home, locate]
+
+  - type: horizontal-stack
+    cards:
+      - type: button
+        entity: button.robbi_ganze_wohnung_reinigen
+        name: Ganze Wohnung
+        icon: mdi:home-floor-a
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.robbi_ganze_wohnung_reinigen
+      - type: button
+        entity: button.robbi_ausgewahlte_raume_reinigen
+        name: Auswahl reinigen
+        icon: mdi:floor-plan
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.robbi_ausgewahlte_raume_reinigen
+      - type: button
+        entity: button.robbi_raumauswahl_leeren
+        name: Auswahl leeren
+        icon: mdi:selection-remove
+        tap_action:
+          action: perform-action
+          perform_action: button.press
+          target:
+            entity_id: button.robbi_raumauswahl_leeren
+
+  - type: entities
+    title: Räume (Reihenfolge = Reihenfolge des Anklickens)
+    entities:
+      - entity: sensor.robbi_ausgewahlte_raume
+        name: Reihenfolge
+      - entity: switch.robbi_raume_nacheinander_reinigen
+        name: Reihenfolge strikt einhalten
+      - type: divider
+      - switch.robbi_raum_kuche
+      - switch.robbi_raum_flur
+      - switch.robbi_raum_wohnzimmer
+      - type: divider
+      - entity: sensor.robbi_raum_warteschlange
+        name: Wird gerade gereinigt
+      - select.robbi_reinigungsmodus
+      - vacuum.robbi
+
+  - type: entities
+    title: Station
+    entities:
+      - sensor.robbi_station
+      - button.robbi_staub_absaugen
+      - button.robbi_mopps_waschen
+      - button.robbi_mopps_trocknen
+      - select.robbi_absaug_haufigkeit
+
+  - type: glance
+    title: Status
+    entities:
+      - sensor.robbi_batterie
+      - sensor.robbi_gereinigte_flache
+      - sensor.robbi_reinigungsdauer
+      - sensor.robbi_letzter_auftrag
+      - sensor.robbi_fehler
+
+  - type: glance
+    title: Verbrauchsteile
+    entities:
+      - sensor.robbi_hauptburste
+      - sensor.robbi_seitenburste
+      - sensor.robbi_filter
+      - sensor.robbi_wischmopps
+      - sensor.robbi_reinigungsmittel
+
+  - type: picture-entity
+    entity: image.robbi_karte
+    show_state: false

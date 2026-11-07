@@ -1,0 +1,17 @@
+{
+  "did": "E0000000000000000001",
+  "name": "E0000000000000000001",
+  "class": "c8rj4y",
+  "resource": "abcd",
+  "company": "eco-ng",
+  "service": {
+    "jmq": "jmq-ngiot-eu.dc.ww.ecouser.net",
+    "mqs": "api-ngiot.dc-eu.ww.ecouser.net"
+  },
+  "deviceName": "DEEBOT T50 MAX PRO OMNI",
+  "product_category": "DEEBOT",
+  "model": "T50",
+  "nick": "Robbi",
+  "homeSort": 1,
+  "status": 1
+}
