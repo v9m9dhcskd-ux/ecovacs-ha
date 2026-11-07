@@ -23,9 +23,10 @@ from homeassistant.components.vacuum import (
     VacuumEntityFeature,
 )
 from homeassistant.core import HomeAssistant, ServiceResponse, callback
-from homeassistant.exceptions import ServiceValidationError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
+from .commands import response_code
 from .const import DOMAIN
 from .controller import EcovacsOmniConfigEntry
 from .entity import EcovacsOmniEntity
@@ -177,9 +178,19 @@ class EcovacsOmniVacuum(EcovacsOmniEntity[Capabilities], StateVacuumEntity):
         await self._device.execute_command(self._capability.fan_speed.set(fan_speed))
 
     async def _clean_command(self, action: CleanAction) -> None:
-        await self._device.execute_command(
+        response = await self._device.execute_command(
             self._capability.clean.action.command(action)
         )
+        if (code := response_code(response)) not in (None, 0):
+            raise HomeAssistantError(
+                translation_domain=DOMAIN,
+                translation_key="command_rejected",
+                translation_placeholders={
+                    "command": action.value,
+                    "code": str(code),
+                    "response": str(response),
+                },
+            )
 
     async def async_send_command(
         self,

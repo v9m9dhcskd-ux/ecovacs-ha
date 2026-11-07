@@ -67,6 +67,9 @@
     "clean_rejected": {
       "message": "The robot rejected the room cleaning (code {code}). Response: {response}"
     },
+    "command_rejected": {
+      "message": "The robot rejected '{command}' (code {code}). Response: {response}"
+    },
     "params_dict": {
       "message": "Parameters must be a dictionary."
     }
