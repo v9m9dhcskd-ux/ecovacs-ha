@@ -1,513 +1,153 @@
-# Dashboard-Seite für Ecovacs Omni (nur Standard-Karten, keine Zusatz-Installation nötig)
+# Ansicht "Saugroboter" für ein bestehendes Dashboard (nur Standard-Karten)
 #
-# Einrichten:
-#   1. Einstellungen → Dashboards → Dashboard hinzufügen → "Neues Dashboard von Grund auf"
-#   2. Dashboard öffnen → Stift (Bearbeiten) → ⋮ → "Rohkonfigurationseditor"
-#   3. Diesen Inhalt einfügen und speichern
-#   (Für ein bestehendes Dashboard nur den Block unter "views:" als weitere Ansicht einfügen.)
+# Einfügen:
+#   Dashboard öffnen → Stift (Bearbeiten) → "+" neben den Ansichten (Ansicht hinzufügen)
+#   → ⋮ oben rechts → "In YAML bearbeiten" → alles ersetzen durch diesen Inhalt → Speichern
 #
 # Anpassen:
-#   - Eingestellt für den Roboter "eg_wohnzimmer_putzfrau" (vacuum.eg_wohnzimmer_putzfrau).
-#     Für einen anderen Roboter "eg_wohnzimmer_putzfrau" per Suchen & Ersetzen ändern.
-#   - Die Raum-Buttons tragen Beispielnamen. Die echten Namen aus der Ecovacs-App stehen
-#     ganz unten auf der Seite in der Karte "Raumnamen". Groß-/Kleinschreibung ist egal.
-#
-# Bedienung der Raum-Buttons:
-#   Tippen  → Raum reinigen (mit den Einstellungen aus "Einstellungen")
-#   Halten  → Raum gründlich reinigen (2 Durchgänge)
+#   - Roboter: vacuum.eg_wohnzimmer_putzfrau (für einen anderen per Suchen & Ersetzen ändern)
+#   - Raumnamen: Beispielnamen durch die Namen aus der Ecovacs-App ersetzen. Die Namen stehen
+#     unter Entwicklerwerkzeuge → Zustände → vacuum.eg_wohnzimmer_putzfrau → Attribut "rooms".
+#     Groß-/Kleinschreibung ist egal. Weitere Räume: einen Button-Block kopieren.
+#   - Kombinationen: Räume werden in der angegebenen Reihenfolge gereinigt.
 
 title: Saugroboter
-views:
-  - title: Saugroboter
-    path: saugroboter
-    icon: mdi:robot-vacuum
-    type: sections
-    max_columns: 3
-    badges:
-      - type: entity
+path: saugroboter
+icon: mdi:robot-vacuum
+type: sections
+max_columns: 2
+sections:
+  # ---------------------------------------------------------------- Status
+  - type: grid
+    cards:
+      - type: heading
+        heading: Status
+        icon: mdi:robot-vacuum
+
+      - type: tile
         entity: vacuum.eg_wohnzimmer_putzfrau
-        show_name: false
-        show_state: true
-        show_icon: true
-      - type: entity
-        entity: sensor.eg_wohnzimmer_putzfrau_batterie
-        show_name: false
-      - type: entity
+        name: Putzfrau
+        grid_options:
+          columns: full
+        features_position: bottom
+        features:
+          - type: vacuum-commands
+            commands: [start_pause, stop, return_home]
+
+      - type: tile
         entity: sensor.eg_wohnzimmer_putzfrau_aktueller_raum
-        name: Raum
-        show_name: true
-        visibility:
-          - condition: state
-            entity: sensor.eg_wohnzimmer_putzfrau_aktueller_raum
-            state_not: [unknown, unavailable]
-      - type: entity
+        name: Aktueller Raum
+        icon: mdi:map-marker-radius
+      - type: tile
         entity: sensor.eg_wohnzimmer_putzfrau_station
         name: Station
-        show_name: true
-        visibility:
-          - condition: state
-            entity: sensor.eg_wohnzimmer_putzfrau_station
-            state_not: [idle, unknown, unavailable]
-      - type: entity
+
+      # Nur sichtbar, wenn der Roboter einen Fehler meldet
+      - type: tile
         entity: sensor.eg_wohnzimmer_putzfrau_fehler
         name: Fehler
-        show_name: true
+        icon: mdi:alert-circle
         color: red
+        state_content: [state, description]
+        grid_options:
+          columns: full
         visibility:
           - condition: state
             entity: sensor.eg_wohnzimmer_putzfrau_fehler
             state_not: ["0", unknown, unavailable]
 
-    sections:
-      # ------------------------------------------------------------------ Status
-      - type: grid
-        cards:
-          - type: heading
-            heading: Status
-            icon: mdi:robot-vacuum
+  # ----------------------------------------------------------------- Räume
+  - type: grid
+    cards:
+      - type: heading
+        heading: Räume
+        icon: mdi:floor-plan
 
-          - type: tile
-            entity: vacuum.eg_wohnzimmer_putzfrau
-            name: Putzfrau
-            state_content: [state, fan_speed]
-            vertical: false
-            grid_options:
-              columns: full
-            features_position: bottom
-            features:
-              - type: vacuum-commands
-                commands: [start_pause, stop, return_home, locate]
+      - type: button
+        name: Küche
+        icon: mdi:silverware-fork-knife
+        show_state: false
+        grid_options:
+          columns: 6
+          rows: 1
+        tap_action:
+          action: perform-action
+          perform_action: ecovacs_omni.clean_rooms
+          target:
+            entity_id: vacuum.eg_wohnzimmer_putzfrau
+          data:
+            rooms: [Küche]
+      - type: button
+        name: Flur
+        icon: mdi:door
+        show_state: false
+        grid_options:
+          columns: 6
+          rows: 1
+        tap_action:
+          action: perform-action
+          perform_action: ecovacs_omni.clean_rooms
+          target:
+            entity_id: vacuum.eg_wohnzimmer_putzfrau
+          data:
+            rooms: [Flur]
+      - type: button
+        name: Wohnzimmer
+        icon: mdi:sofa
+        show_state: false
+        grid_options:
+          columns: 6
+          rows: 1
+        tap_action:
+          action: perform-action
+          perform_action: ecovacs_omni.clean_rooms
+          target:
+            entity_id: vacuum.eg_wohnzimmer_putzfrau
+          data:
+            rooms: [Wohnzimmer]
+      - type: button
+        name: Bad
+        icon: mdi:shower
+        show_state: false
+        grid_options:
+          columns: 6
+          rows: 1
+        tap_action:
+          action: perform-action
+          perform_action: ecovacs_omni.clean_rooms
+          target:
+            entity_id: vacuum.eg_wohnzimmer_putzfrau
+          data:
+            rooms: [Bad]
 
-          # Nur sichtbar, solange ein Auftrag läuft bzw. gelaufen ist
-          - type: tile
-            entity: sensor.eg_wohnzimmer_putzfrau_aktueller_raum
-            name: Reinigt gerade
-            icon: mdi:map-marker-radius
-            visibility:
-              - condition: state
-                entity: sensor.eg_wohnzimmer_putzfrau_aktueller_raum
-                state_not: [unknown, unavailable]
-          - type: tile
-            entity: sensor.eg_wohnzimmer_putzfrau_raum_warteschlange
-            name: Warteschlange
-            state_content: [state, remaining]
-            visibility:
-              - condition: state
-                entity: sensor.eg_wohnzimmer_putzfrau_raum_warteschlange
-                state_not: [unknown, unavailable]
-          - type: tile
-            entity: button.eg_wohnzimmer_putzfrau_raum_warteschlange_abbrechen
-            name: Warteschlange
-            hide_state: true
-            features_position: inline
-            features:
-              - type: button
-                action_name: Abbrechen
-            visibility:
-              - condition: state
-                entity: sensor.eg_wohnzimmer_putzfrau_raum_warteschlange
-                state_not: [unknown, unavailable]
-          - type: tile
-            entity: sensor.eg_wohnzimmer_putzfrau_fehler
-            name: Fehler
-            color: red
-            state_content: [state, description]
-            grid_options:
-              columns: full
-            visibility:
-              - condition: state
-                entity: sensor.eg_wohnzimmer_putzfrau_fehler
-                state_not: ["0", unknown, unavailable]
-
-          - type: picture-entity
-            entity: image.eg_wohnzimmer_putzfrau_karte
-            show_name: false
-            show_state: false
-            grid_options:
-              columns: full
-
-          - type: tile
-            entity: sensor.eg_wohnzimmer_putzfrau_batterie
-            name: Akku
-          - type: tile
-            entity: sensor.eg_wohnzimmer_putzfrau_station
-            name: Station
-          - type: tile
-            entity: sensor.eg_wohnzimmer_putzfrau_letzter_auftrag
-            name: Letzter Auftrag
-          - type: tile
-            entity: sensor.eg_wohnzimmer_putzfrau_raume_des_auftrags
-            name: Räume
-          - type: tile
-            entity: sensor.eg_wohnzimmer_putzfrau_gereinigte_flache
-            name: Fläche
-          - type: tile
-            entity: sensor.eg_wohnzimmer_putzfrau_reinigungsdauer
-            name: Dauer
-
-      # ------------------------------------------------------------------ Räume
-      - type: grid
-        cards:
-          - type: heading
-            heading: Räume reinigen
-            icon: mdi:floor-plan
-
-          - type: button
-            name: Ganze Wohnung
-            icon: mdi:home-floor-a
-            show_state: false
-            grid_options:
-              columns: full
-              rows: 1
-            tap_action:
-              action: perform-action
-              perform_action: button.press
-              target:
-                entity_id: button.eg_wohnzimmer_putzfrau_ganze_wohnung_reinigen
-
-          # --- Ein Button pro Raum: Namen anpassen, Buttons kopieren/löschen ---
-          - type: button
-            name: Küche
-            icon: mdi:silverware-fork-knife
-            show_state: false
-            grid_options:
-              columns: 4
-              rows: 2
-            tap_action:
-              action: perform-action
-              perform_action: ecovacs_omni.clean_rooms
-              target:
-                entity_id: vacuum.eg_wohnzimmer_putzfrau
-              data:
-                rooms: [Küche]
-            hold_action:
-              action: perform-action
-              perform_action: ecovacs_omni.clean_rooms
-              target:
-                entity_id: vacuum.eg_wohnzimmer_putzfrau
-              data:
-                rooms: [Küche]
-                cleanings: 2
-          - type: button
-            name: Flur
-            icon: mdi:door
-            show_state: false
-            grid_options:
-              columns: 4
-              rows: 2
-            tap_action:
-              action: perform-action
-              perform_action: ecovacs_omni.clean_rooms
-              target:
-                entity_id: vacuum.eg_wohnzimmer_putzfrau
-              data:
-                rooms: [Flur]
-            hold_action:
-              action: perform-action
-              perform_action: ecovacs_omni.clean_rooms
-              target:
-                entity_id: vacuum.eg_wohnzimmer_putzfrau
-              data:
-                rooms: [Flur]
-                cleanings: 2
-          - type: button
-            name: Wohnzimmer
-            icon: mdi:sofa
-            show_state: false
-            grid_options:
-              columns: 4
-              rows: 2
-            tap_action:
-              action: perform-action
-              perform_action: ecovacs_omni.clean_rooms
-              target:
-                entity_id: vacuum.eg_wohnzimmer_putzfrau
-              data:
-                rooms: [Wohnzimmer]
-            hold_action:
-              action: perform-action
-              perform_action: ecovacs_omni.clean_rooms
-              target:
-                entity_id: vacuum.eg_wohnzimmer_putzfrau
-              data:
-                rooms: [Wohnzimmer]
-                cleanings: 2
-          - type: button
-            name: Schlafzimmer
-            icon: mdi:bed
-            show_state: false
-            grid_options:
-              columns: 4
-              rows: 2
-            tap_action:
-              action: perform-action
-              perform_action: ecovacs_omni.clean_rooms
-              target:
-                entity_id: vacuum.eg_wohnzimmer_putzfrau
-              data:
-                rooms: [Schlafzimmer]
-            hold_action:
-              action: perform-action
-              perform_action: ecovacs_omni.clean_rooms
-              target:
-                entity_id: vacuum.eg_wohnzimmer_putzfrau
-              data:
-                rooms: [Schlafzimmer]
-                cleanings: 2
-          - type: button
-            name: Bad
-            icon: mdi:shower
-            show_state: false
-            grid_options:
-              columns: 4
-              rows: 2
-            tap_action:
-              action: perform-action
-              perform_action: ecovacs_omni.clean_rooms
-              target:
-                entity_id: vacuum.eg_wohnzimmer_putzfrau
-              data:
-                rooms: [Bad]
-            hold_action:
-              action: perform-action
-              perform_action: ecovacs_omni.clean_rooms
-              target:
-                entity_id: vacuum.eg_wohnzimmer_putzfrau
-              data:
-                rooms: [Bad]
-                cleanings: 2
-          - type: button
-            name: Arbeitszimmer
-            icon: mdi:desk
-            show_state: false
-            grid_options:
-              columns: 4
-              rows: 2
-            tap_action:
-              action: perform-action
-              perform_action: ecovacs_omni.clean_rooms
-              target:
-                entity_id: vacuum.eg_wohnzimmer_putzfrau
-              data:
-                rooms: [Arbeitszimmer]
-            hold_action:
-              action: perform-action
-              perform_action: ecovacs_omni.clean_rooms
-              target:
-                entity_id: vacuum.eg_wohnzimmer_putzfrau
-              data:
-                rooms: [Arbeitszimmer]
-                cleanings: 2
-
-          # --- Kombinationen: mehrere Räume in dieser Reihenfolge ---
-          - type: heading
-            heading: Kombinationen
-            heading_style: subtitle
-          - type: button
-            name: Küche + Flur
-            icon: mdi:numeric-2-box-multiple-outline
-            show_state: false
-            grid_options:
-              columns: 6
-              rows: 1
-            tap_action:
-              action: perform-action
-              perform_action: ecovacs_omni.clean_rooms
-              target:
-                entity_id: vacuum.eg_wohnzimmer_putzfrau
-              data:
-                rooms: [Küche, Flur]
-          - type: button
-            name: Nur wischen
-            icon: mdi:water
-            show_state: false
-            grid_options:
-              columns: 6
-              rows: 1
-            tap_action:
-              action: perform-action
-              perform_action: ecovacs_omni.clean_rooms
-              target:
-                entity_id: vacuum.eg_wohnzimmer_putzfrau
-              data:
-                rooms: [Küche, Bad]
-                work_mode: mop
-
-      # ------------------------------------------------------------ Einstellungen
-      - type: grid
-        cards:
-          - type: heading
-            heading: Einstellungen
-            icon: mdi:tune-variant
-
-          - type: tile
-            entity: select.eg_wohnzimmer_putzfrau_reinigungsmodus
-            name: Modus
-            grid_options:
-              columns: full
-            features_position: bottom
-            features:
-              - type: select-options
-          - type: tile
-            entity: vacuum.eg_wohnzimmer_putzfrau
-            name: Saugstärke
-            icon: mdi:fan
-            state_content: fan_speed
-            grid_options:
-              columns: full
-            features_position: bottom
-            features:
-              - type: vacuum-fan-speed
-                style: icons
-          - type: tile
-            entity: number.eg_wohnzimmer_putzfrau_wassermenge
-            name: Wassermenge
-            grid_options:
-              columns: full
-            features_position: bottom
-            features:
-              - type: numeric-input
-                style: slider
-          - type: tile
-            entity: number.eg_wohnzimmer_putzfrau_durchgange
-            name: Durchgänge
-            grid_options:
-              columns: full
-            features_position: bottom
-            features:
-              - type: numeric-input
-                style: buttons
-
-          - type: tile
-            entity: switch.eg_wohnzimmer_putzfrau_raume_nacheinander_reinigen
-            name: Reihenfolge einhalten
-            features_position: inline
-            features:
-              - type: toggle
-          - type: tile
-            entity: switch.eg_wohnzimmer_putzfrau_raum_einstellungen_verwenden
-            name: Raum-Einstellungen der App
-            features_position: inline
-            features:
-              - type: toggle
-          - type: tile
-            entity: switch.eg_wohnzimmer_putzfrau_teppich_boost
-            name: Teppich-Boost
-            features_position: inline
-            features:
-              - type: toggle
-          - type: tile
-            entity: switch.eg_wohnzimmer_putzfrau_nach_dem_laden_fortsetzen
-            name: Nach Laden fortsetzen
-            features_position: inline
-            features:
-              - type: toggle
-
-          - type: heading
-            heading: Station
-            heading_style: subtitle
-          - type: tile
-            entity: switch.eg_wohnzimmer_putzfrau_automatisch_absaugen
-            name: Automatisch absaugen
-            features_position: inline
-            features:
-              - type: toggle
-          - type: tile
-            entity: select.eg_wohnzimmer_putzfrau_absaug_haufigkeit
-            name: Absaugen
-            features_position: inline
-            features:
-              - type: select-options
-          - type: button
-            entity: button.eg_wohnzimmer_putzfrau_staub_absaugen
-            name: Absaugen
-            icon: mdi:delete-restore
-            show_state: false
-            grid_options:
-              columns: 3
-              rows: 2
-            tap_action:
-              action: perform-action
-              perform_action: button.press
-              target:
-                entity_id: button.eg_wohnzimmer_putzfrau_staub_absaugen
-          - type: button
-            entity: button.eg_wohnzimmer_putzfrau_mopps_waschen
-            name: Waschen
-            icon: mdi:water-sync
-            show_state: false
-            grid_options:
-              columns: 3
-              rows: 2
-            tap_action:
-              action: perform-action
-              perform_action: button.press
-              target:
-                entity_id: button.eg_wohnzimmer_putzfrau_mopps_waschen
-          - type: button
-            entity: button.eg_wohnzimmer_putzfrau_mopps_trocknen
-            name: Trocknen
-            icon: mdi:weather-windy
-            show_state: false
-            grid_options:
-              columns: 3
-              rows: 2
-            tap_action:
-              action: perform-action
-              perform_action: button.press
-              target:
-                entity_id: button.eg_wohnzimmer_putzfrau_mopps_trocknen
-          - type: button
-            entity: button.eg_wohnzimmer_putzfrau_station_reinigen
-            name: Station
-            icon: mdi:home-floor-0
-            show_state: false
-            grid_options:
-              columns: 3
-              rows: 2
-            tap_action:
-              action: perform-action
-              perform_action: button.press
-              target:
-                entity_id: button.eg_wohnzimmer_putzfrau_station_reinigen
-
-      # ---------------------------------------------------------------- Wartung
-      - type: grid
-        column_span: 3
-        cards:
-          - type: heading
-            heading: Wartung
-            icon: mdi:wrench-outline
-            badges:
-              - type: entity
-                entity: sensor.eg_wohnzimmer_putzfrau_anzahl_reinigungen
-                show_state: true
-                show_icon: true
-          - type: tile
-            entity: sensor.eg_wohnzimmer_putzfrau_hauptburste
-            name: Hauptbürste
-          - type: tile
-            entity: sensor.eg_wohnzimmer_putzfrau_seitenburste
-            name: Seitenbürste
-          - type: tile
-            entity: sensor.eg_wohnzimmer_putzfrau_filter
-            name: Filter
-          - type: tile
-            entity: sensor.eg_wohnzimmer_putzfrau_wischmopps
-            name: Wischmopps
-          - type: tile
-            entity: sensor.eg_wohnzimmer_putzfrau_reinigungsmittel
-            name: Reinigungsmittel
-          - type: tile
-            entity: sensor.eg_wohnzimmer_putzfrau_geratepflege
-            name: Gerätepflege
-
-          - type: markdown
-            title: Raumnamen
-            grid_options:
-              columns: full
-            content: >-
-              {% set rooms = state_attr('vacuum.eg_wohnzimmer_putzfrau', 'rooms') or {} %}
-              {% if rooms %}Diese Namen kennt der Roboter (für die Raum-Buttons):
-              {% for name in rooms %}**{{ name }}**{% if not loop.last %} · {% endif %}{% endfor %}
-              {% else %}Noch keine Räume geladen.{% endif %}
+      - type: heading
+        heading: Kombiniert
+        heading_style: subtitle
+      - type: button
+        name: Küche + Flur
+        icon: mdi:numeric-2-box-multiple-outline
+        show_state: false
+        grid_options:
+          columns: 6
+          rows: 1
+        tap_action:
+          action: perform-action
+          perform_action: ecovacs_omni.clean_rooms
+          target:
+            entity_id: vacuum.eg_wohnzimmer_putzfrau
+          data:
+            rooms: [Küche, Flur]
+      - type: button
+        name: Wohnzimmer + Flur
+        icon: mdi:numeric-2-box-multiple-outline
+        show_state: false
+        grid_options:
+          columns: 6
+          rows: 1
+        tap_action:
+          action: perform-action
+          perform_action: ecovacs_omni.clean_rooms
+          target:
+            entity_id: vacuum.eg_wohnzimmer_putzfrau
+          data:
+            rooms: [Wohnzimmer, Flur]

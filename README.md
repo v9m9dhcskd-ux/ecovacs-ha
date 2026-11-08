@@ -69,9 +69,9 @@ Während der Reinigung zeigen:
 - **Aktueller Raum:** der Raum, den der Roboter gerade reinigt (bzw. gleich anfährt)
 - **Raum-Warteschlange:** im Nacheinander-Modus den aktuellen und die restlichen Räume
 
-Eine fertige Dashboard-Seite liegt in [`examples/dashboard.yaml`](examples/dashboard.yaml). Sie kommt
-ohne Zusatzkarten aus und hat vier Bereiche: Status mit Karte, Raum-Buttons (Tippen = Raum reinigen,
-Halten = 2 Durchgänge), Einstellungen samt Station und Wartung. Einrichtung und Anpassung stehen
+Eine schlanke Dashboard-Ansicht liegt in [`examples/dashboard.yaml`](examples/dashboard.yaml). Sie wird
+in ein bestehendes Dashboard eingefügt, kommt ohne Zusatzkarten aus und zeigt Status, aktuellen Raum,
+Station und Fehler sowie Buttons für einzelne und kombinierte Räume. Einrichtung und Anpassung stehen
 oben in der Datei.
 
 ### Reihenfolge: „Räume nacheinander reinigen“
