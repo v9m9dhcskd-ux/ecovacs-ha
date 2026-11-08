@@ -7,8 +7,8 @@
 #   (Für ein bestehendes Dashboard nur den Block unter "views:" als weitere Ansicht einfügen.)
 #
 # Anpassen:
-#   - "robbi" durch den Namen deines Roboters ersetzen (Suchen & Ersetzen), siehe
-#     Einstellungen → Geräte & Dienste → Ecovacs Omni → Entitäten.
+#   - Eingestellt für den Roboter "eg_wohnzimmer_putzfrau" (vacuum.eg_wohnzimmer_putzfrau).
+#     Für einen anderen Roboter "eg_wohnzimmer_putzfrau" per Suchen & Ersetzen ändern.
 #   - Die Raum-Buttons tragen Beispielnamen. Die echten Namen aus der Ecovacs-App stehen
 #     ganz unten auf der Seite in der Karte "Raumnamen". Groß-/Kleinschreibung ist egal.
 #
@@ -25,37 +25,37 @@ views:
     max_columns: 3
     badges:
       - type: entity
-        entity: vacuum.robbi
+        entity: vacuum.eg_wohnzimmer_putzfrau
         show_name: false
         show_state: true
         show_icon: true
       - type: entity
-        entity: sensor.robbi_batterie
+        entity: sensor.eg_wohnzimmer_putzfrau_batterie
         show_name: false
       - type: entity
-        entity: sensor.robbi_aktueller_raum
+        entity: sensor.eg_wohnzimmer_putzfrau_aktueller_raum
         name: Raum
         show_name: true
         visibility:
           - condition: state
-            entity: sensor.robbi_aktueller_raum
+            entity: sensor.eg_wohnzimmer_putzfrau_aktueller_raum
             state_not: [unknown, unavailable]
       - type: entity
-        entity: sensor.robbi_station
+        entity: sensor.eg_wohnzimmer_putzfrau_station
         name: Station
         show_name: true
         visibility:
           - condition: state
-            entity: sensor.robbi_station
+            entity: sensor.eg_wohnzimmer_putzfrau_station
             state_not: [idle, unknown, unavailable]
       - type: entity
-        entity: sensor.robbi_fehler
+        entity: sensor.eg_wohnzimmer_putzfrau_fehler
         name: Fehler
         show_name: true
         color: red
         visibility:
           - condition: state
-            entity: sensor.robbi_fehler
+            entity: sensor.eg_wohnzimmer_putzfrau_fehler
             state_not: ["0", unknown, unavailable]
 
     sections:
@@ -67,8 +67,8 @@ views:
             icon: mdi:robot-vacuum
 
           - type: tile
-            entity: vacuum.robbi
-            name: Robbi
+            entity: vacuum.eg_wohnzimmer_putzfrau
+            name: Putzfrau
             state_content: [state, fan_speed]
             vertical: false
             grid_options:
@@ -80,23 +80,23 @@ views:
 
           # Nur sichtbar, solange ein Auftrag läuft bzw. gelaufen ist
           - type: tile
-            entity: sensor.robbi_aktueller_raum
+            entity: sensor.eg_wohnzimmer_putzfrau_aktueller_raum
             name: Reinigt gerade
             icon: mdi:map-marker-radius
             visibility:
               - condition: state
-                entity: sensor.robbi_aktueller_raum
+                entity: sensor.eg_wohnzimmer_putzfrau_aktueller_raum
                 state_not: [unknown, unavailable]
           - type: tile
-            entity: sensor.robbi_raum_warteschlange
+            entity: sensor.eg_wohnzimmer_putzfrau_raum_warteschlange
             name: Warteschlange
             state_content: [state, remaining]
             visibility:
               - condition: state
-                entity: sensor.robbi_raum_warteschlange
+                entity: sensor.eg_wohnzimmer_putzfrau_raum_warteschlange
                 state_not: [unknown, unavailable]
           - type: tile
-            entity: button.robbi_raum_warteschlange_abbrechen
+            entity: button.eg_wohnzimmer_putzfrau_raum_warteschlange_abbrechen
             name: Warteschlange
             hide_state: true
             features_position: inline
@@ -105,10 +105,10 @@ views:
                 action_name: Abbrechen
             visibility:
               - condition: state
-                entity: sensor.robbi_raum_warteschlange
+                entity: sensor.eg_wohnzimmer_putzfrau_raum_warteschlange
                 state_not: [unknown, unavailable]
           - type: tile
-            entity: sensor.robbi_fehler
+            entity: sensor.eg_wohnzimmer_putzfrau_fehler
             name: Fehler
             color: red
             state_content: [state, description]
@@ -116,33 +116,33 @@ views:
               columns: full
             visibility:
               - condition: state
-                entity: sensor.robbi_fehler
+                entity: sensor.eg_wohnzimmer_putzfrau_fehler
                 state_not: ["0", unknown, unavailable]
 
           - type: picture-entity
-            entity: image.robbi_karte
+            entity: image.eg_wohnzimmer_putzfrau_karte
             show_name: false
             show_state: false
             grid_options:
               columns: full
 
           - type: tile
-            entity: sensor.robbi_batterie
+            entity: sensor.eg_wohnzimmer_putzfrau_batterie
             name: Akku
           - type: tile
-            entity: sensor.robbi_station
+            entity: sensor.eg_wohnzimmer_putzfrau_station
             name: Station
           - type: tile
-            entity: sensor.robbi_letzter_auftrag
+            entity: sensor.eg_wohnzimmer_putzfrau_letzter_auftrag
             name: Letzter Auftrag
           - type: tile
-            entity: sensor.robbi_raume_des_auftrags
+            entity: sensor.eg_wohnzimmer_putzfrau_raume_des_auftrags
             name: Räume
           - type: tile
-            entity: sensor.robbi_gereinigte_flache
+            entity: sensor.eg_wohnzimmer_putzfrau_gereinigte_flache
             name: Fläche
           - type: tile
-            entity: sensor.robbi_reinigungsdauer
+            entity: sensor.eg_wohnzimmer_putzfrau_reinigungsdauer
             name: Dauer
 
       # ------------------------------------------------------------------ Räume
@@ -163,7 +163,7 @@ views:
               action: perform-action
               perform_action: button.press
               target:
-                entity_id: button.robbi_ganze_wohnung_reinigen
+                entity_id: button.eg_wohnzimmer_putzfrau_ganze_wohnung_reinigen
 
           # --- Ein Button pro Raum: Namen anpassen, Buttons kopieren/löschen ---
           - type: button
@@ -177,14 +177,14 @@ views:
               action: perform-action
               perform_action: ecovacs_omni.clean_rooms
               target:
-                entity_id: vacuum.robbi
+                entity_id: vacuum.eg_wohnzimmer_putzfrau
               data:
                 rooms: [Küche]
             hold_action:
               action: perform-action
               perform_action: ecovacs_omni.clean_rooms
               target:
-                entity_id: vacuum.robbi
+                entity_id: vacuum.eg_wohnzimmer_putzfrau
               data:
                 rooms: [Küche]
                 cleanings: 2
@@ -199,14 +199,14 @@ views:
               action: perform-action
               perform_action: ecovacs_omni.clean_rooms
               target:
-                entity_id: vacuum.robbi
+                entity_id: vacuum.eg_wohnzimmer_putzfrau
               data:
                 rooms: [Flur]
             hold_action:
               action: perform-action
               perform_action: ecovacs_omni.clean_rooms
               target:
-                entity_id: vacuum.robbi
+                entity_id: vacuum.eg_wohnzimmer_putzfrau
               data:
                 rooms: [Flur]
                 cleanings: 2
@@ -221,14 +221,14 @@ views:
               action: perform-action
               perform_action: ecovacs_omni.clean_rooms
               target:
-                entity_id: vacuum.robbi
+                entity_id: vacuum.eg_wohnzimmer_putzfrau
               data:
                 rooms: [Wohnzimmer]
             hold_action:
               action: perform-action
               perform_action: ecovacs_omni.clean_rooms
               target:
-                entity_id: vacuum.robbi
+                entity_id: vacuum.eg_wohnzimmer_putzfrau
               data:
                 rooms: [Wohnzimmer]
                 cleanings: 2
@@ -243,14 +243,14 @@ views:
               action: perform-action
               perform_action: ecovacs_omni.clean_rooms
               target:
-                entity_id: vacuum.robbi
+                entity_id: vacuum.eg_wohnzimmer_putzfrau
               data:
                 rooms: [Schlafzimmer]
             hold_action:
               action: perform-action
               perform_action: ecovacs_omni.clean_rooms
               target:
-                entity_id: vacuum.robbi
+                entity_id: vacuum.eg_wohnzimmer_putzfrau
               data:
                 rooms: [Schlafzimmer]
                 cleanings: 2
@@ -265,14 +265,14 @@ views:
               action: perform-action
               perform_action: ecovacs_omni.clean_rooms
               target:
-                entity_id: vacuum.robbi
+                entity_id: vacuum.eg_wohnzimmer_putzfrau
               data:
                 rooms: [Bad]
             hold_action:
               action: perform-action
               perform_action: ecovacs_omni.clean_rooms
               target:
-                entity_id: vacuum.robbi
+                entity_id: vacuum.eg_wohnzimmer_putzfrau
               data:
                 rooms: [Bad]
                 cleanings: 2
@@ -287,14 +287,14 @@ views:
               action: perform-action
               perform_action: ecovacs_omni.clean_rooms
               target:
-                entity_id: vacuum.robbi
+                entity_id: vacuum.eg_wohnzimmer_putzfrau
               data:
                 rooms: [Arbeitszimmer]
             hold_action:
               action: perform-action
               perform_action: ecovacs_omni.clean_rooms
               target:
-                entity_id: vacuum.robbi
+                entity_id: vacuum.eg_wohnzimmer_putzfrau
               data:
                 rooms: [Arbeitszimmer]
                 cleanings: 2
@@ -314,7 +314,7 @@ views:
               action: perform-action
               perform_action: ecovacs_omni.clean_rooms
               target:
-                entity_id: vacuum.robbi
+                entity_id: vacuum.eg_wohnzimmer_putzfrau
               data:
                 rooms: [Küche, Flur]
           - type: button
@@ -328,7 +328,7 @@ views:
               action: perform-action
               perform_action: ecovacs_omni.clean_rooms
               target:
-                entity_id: vacuum.robbi
+                entity_id: vacuum.eg_wohnzimmer_putzfrau
               data:
                 rooms: [Küche, Bad]
                 work_mode: mop
@@ -341,7 +341,7 @@ views:
             icon: mdi:tune-variant
 
           - type: tile
-            entity: select.robbi_reinigungsmodus
+            entity: select.eg_wohnzimmer_putzfrau_reinigungsmodus
             name: Modus
             grid_options:
               columns: full
@@ -349,7 +349,7 @@ views:
             features:
               - type: select-options
           - type: tile
-            entity: vacuum.robbi
+            entity: vacuum.eg_wohnzimmer_putzfrau
             name: Saugstärke
             icon: mdi:fan
             state_content: fan_speed
@@ -360,7 +360,7 @@ views:
               - type: vacuum-fan-speed
                 style: icons
           - type: tile
-            entity: number.robbi_wassermenge
+            entity: number.eg_wohnzimmer_putzfrau_wassermenge
             name: Wassermenge
             grid_options:
               columns: full
@@ -369,7 +369,7 @@ views:
               - type: numeric-input
                 style: slider
           - type: tile
-            entity: number.robbi_durchgange
+            entity: number.eg_wohnzimmer_putzfrau_durchgange
             name: Durchgänge
             grid_options:
               columns: full
@@ -379,25 +379,25 @@ views:
                 style: buttons
 
           - type: tile
-            entity: switch.robbi_raume_nacheinander_reinigen
+            entity: switch.eg_wohnzimmer_putzfrau_raume_nacheinander_reinigen
             name: Reihenfolge einhalten
             features_position: inline
             features:
               - type: toggle
           - type: tile
-            entity: switch.robbi_raum_einstellungen_verwenden
+            entity: switch.eg_wohnzimmer_putzfrau_raum_einstellungen_verwenden
             name: Raum-Einstellungen der App
             features_position: inline
             features:
               - type: toggle
           - type: tile
-            entity: switch.robbi_teppich_boost
+            entity: switch.eg_wohnzimmer_putzfrau_teppich_boost
             name: Teppich-Boost
             features_position: inline
             features:
               - type: toggle
           - type: tile
-            entity: switch.robbi_nach_dem_laden_fortsetzen
+            entity: switch.eg_wohnzimmer_putzfrau_nach_dem_laden_fortsetzen
             name: Nach Laden fortsetzen
             features_position: inline
             features:
@@ -407,19 +407,19 @@ views:
             heading: Station
             heading_style: subtitle
           - type: tile
-            entity: switch.robbi_automatisch_absaugen
+            entity: switch.eg_wohnzimmer_putzfrau_automatisch_absaugen
             name: Automatisch absaugen
             features_position: inline
             features:
               - type: toggle
           - type: tile
-            entity: select.robbi_absaug_haufigkeit
+            entity: select.eg_wohnzimmer_putzfrau_absaug_haufigkeit
             name: Absaugen
             features_position: inline
             features:
               - type: select-options
           - type: button
-            entity: button.robbi_staub_absaugen
+            entity: button.eg_wohnzimmer_putzfrau_staub_absaugen
             name: Absaugen
             icon: mdi:delete-restore
             show_state: false
@@ -430,9 +430,9 @@ views:
               action: perform-action
               perform_action: button.press
               target:
-                entity_id: button.robbi_staub_absaugen
+                entity_id: button.eg_wohnzimmer_putzfrau_staub_absaugen
           - type: button
-            entity: button.robbi_mopps_waschen
+            entity: button.eg_wohnzimmer_putzfrau_mopps_waschen
             name: Waschen
             icon: mdi:water-sync
             show_state: false
@@ -443,9 +443,9 @@ views:
               action: perform-action
               perform_action: button.press
               target:
-                entity_id: button.robbi_mopps_waschen
+                entity_id: button.eg_wohnzimmer_putzfrau_mopps_waschen
           - type: button
-            entity: button.robbi_mopps_trocknen
+            entity: button.eg_wohnzimmer_putzfrau_mopps_trocknen
             name: Trocknen
             icon: mdi:weather-windy
             show_state: false
@@ -456,9 +456,9 @@ views:
               action: perform-action
               perform_action: button.press
               target:
-                entity_id: button.robbi_mopps_trocknen
+                entity_id: button.eg_wohnzimmer_putzfrau_mopps_trocknen
           - type: button
-            entity: button.robbi_station_reinigen
+            entity: button.eg_wohnzimmer_putzfrau_station_reinigen
             name: Station
             icon: mdi:home-floor-0
             show_state: false
@@ -469,7 +469,7 @@ views:
               action: perform-action
               perform_action: button.press
               target:
-                entity_id: button.robbi_station_reinigen
+                entity_id: button.eg_wohnzimmer_putzfrau_station_reinigen
 
       # ---------------------------------------------------------------- Wartung
       - type: grid
@@ -480,26 +480,26 @@ views:
             icon: mdi:wrench-outline
             badges:
               - type: entity
-                entity: sensor.robbi_anzahl_reinigungen
+                entity: sensor.eg_wohnzimmer_putzfrau_anzahl_reinigungen
                 show_state: true
                 show_icon: true
           - type: tile
-            entity: sensor.robbi_hauptburste
+            entity: sensor.eg_wohnzimmer_putzfrau_hauptburste
             name: Hauptbürste
           - type: tile
-            entity: sensor.robbi_seitenburste
+            entity: sensor.eg_wohnzimmer_putzfrau_seitenburste
             name: Seitenbürste
           - type: tile
-            entity: sensor.robbi_filter
+            entity: sensor.eg_wohnzimmer_putzfrau_filter
             name: Filter
           - type: tile
-            entity: sensor.robbi_wischmopps
+            entity: sensor.eg_wohnzimmer_putzfrau_wischmopps
             name: Wischmopps
           - type: tile
-            entity: sensor.robbi_reinigungsmittel
+            entity: sensor.eg_wohnzimmer_putzfrau_reinigungsmittel
             name: Reinigungsmittel
           - type: tile
-            entity: sensor.robbi_geratepflege
+            entity: sensor.eg_wohnzimmer_putzfrau_geratepflege
             name: Gerätepflege
 
           - type: markdown
@@ -507,7 +507,7 @@ views:
             grid_options:
               columns: full
             content: >-
-              {% set rooms = state_attr('vacuum.robbi', 'rooms') or {} %}
+              {% set rooms = state_attr('vacuum.eg_wohnzimmer_putzfrau', 'rooms') or {} %}
               {% if rooms %}Diese Namen kennt der Roboter (für die Raum-Buttons):
               {% for name in rooms %}**{{ name }}**{% if not loop.last %} · {% endif %}{% endfor %}
               {% else %}Noch keine Räume geladen.{% endif %}
